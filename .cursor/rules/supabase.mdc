@@ -1,0 +1,189 @@
+---
+description: Supabase usage standards
+alwaysApply: false
+---
+
+# Supabase Rules
+
+## Core Principles
+
+- Use Supabase as the **single source of truth** for backend.
+- Never bypass **Row Level Security (RLS)**.
+- Prefer Supabase client over raw SQL in frontend.
+- Keep database logic in PostgreSQL when possible.
+
+---
+
+## Authentication
+
+- Use Supabase Auth for all authentication.
+- Never implement custom auth logic.
+- Always rely on `auth.uid()` for user identity.
+
+Example:
+
+```ts
+const { data } = await supabase.auth.getUser();
+```
+
+---
+
+## Row Level Security (RLS)
+
+- RLS must be enabled for all tables.
+- Every table must have explicit policies.
+- Deny-by-default approach.
+
+Example policy idea:
+
+```sql
+USING (family_id IN (
+  SELECT family_id FROM memberships WHERE user_id = auth.uid()
+))
+```
+
+---
+
+## Data Access Rules
+
+- All queries must respect `family_id` isolation.
+- Never expose cross-family data.
+- Always filter by authenticated user context.
+
+Bad:
+
+```ts
+supabase.from("persons").select("*");
+```
+
+Good:
+
+```ts
+supabase
+  .from("persons")
+  .select("*")
+  .eq("family_id", familyId);
+```
+
+---
+
+## Database Structure Rules
+
+- Use UUID for all primary keys.
+- Always include `family_id` in tenant-scoped tables.
+- Use normalized schema (avoid duplication of relationships).
+- Use separate table for relationships (do NOT embed parent/child fields).
+
+---
+
+## Relationships Handling
+
+- Store relationships in a dedicated `relationships` table.
+- Do NOT use `father_id` or `mother_id`.
+- Support:
+  - parent-child
+  - spouse
+  - adoption
+  - guardianship
+
+---
+
+## Storage Rules
+
+- Use Supabase Storage for:
+  - images
+  - documents
+  - avatars
+
+- Store only URLs in database.
+
+Example:
+
+```ts
+const { data } = supabase.storage
+  .from("avatars")
+  .upload("user-1.png", file);
+```
+
+---
+
+## RPC (Remote Procedures)
+
+- Use RPC for complex queries:
+  - family tree traversal
+  - ancestor/descendant queries
+  - search optimization
+
+Example:
+
+```ts
+supabase.rpc("get_family_tree", {
+  family_id: "uuid",
+});
+```
+
+---
+
+## Query Best Practices
+
+- Prefer `.select()` with explicit fields.
+- Avoid `select('*')` in production code.
+- Paginate large datasets.
+- Use indexes for frequently queried fields.
+
+---
+
+## Performance Rules
+
+- Avoid N+1 queries.
+- Use joins or RPC instead of multiple requests.
+- Cache static or semi-static data when possible.
+
+---
+
+## Security Rules
+
+- Never expose service role key in frontend.
+- Only use anon key in client.
+- All sensitive logic must be enforced in RLS.
+- Assume client is untrusted.
+
+---
+
+## Error Handling
+
+- Always handle Supabase errors explicitly.
+
+Example:
+
+```ts
+const { data, error } = await supabase.from("persons").select();
+
+if (error) {
+  console.error(error.message);
+  throw error;
+}
+```
+
+---
+
+## Anti-patterns (DO NOT DO)
+
+- ❌ Disabling RLS
+- ❌ Using service role in frontend
+- ❌ Storing computed data instead of deriving it
+- ❌ Duplicating relationship fields in tables
+- ❌ Querying without family isolation
+- ❌ Overusing client-side queries for complex logic
+
+---
+
+## Goal
+
+Use Supabase in a way that is:
+
+- Secure (RLS-first)
+- Scalable
+- Multi-tenant safe
+- SQL-native (not JS-heavy backend)
+- Optimized for relationship-heavy data

@@ -1,0 +1,150 @@
+---
+description: React coding standards
+alwaysApply: true
+---
+
+# React Rules
+
+## Core Principles
+
+- Use **functional components only**.
+- Prefer **composition over inheritance**.
+- Keep components **small and focused** (single responsibility).
+- Separate UI and business logic.
+
+---
+
+## Component Structure
+
+- Keep components organized in this order:
+
+1. imports
+2. hooks
+3. derived state
+4. handlers
+5. render
+
+Example:
+
+```tsx
+function MemberCard() {
+  const { data } = useMember();
+
+  const fullName = `${data.firstName} ${data.lastName}`;
+
+  const handleClick = () => {
+    console.log("clicked");
+  };
+
+  return <div onClick={handleClick}>{fullName}</div>;
+}
+```
+
+---
+
+## State Management
+
+- Use **React Query** for server state.
+- Use **useState** for local UI state only.
+- Avoid global state unless necessary (e.g. Zustand only when needed).
+
+---
+
+## Hooks Rules
+
+- Always use hooks at top level.
+- Never call hooks inside loops or conditions.
+- Extract reusable logic into custom hooks.
+
+Example:
+
+```ts
+function useMembers() {
+  return useQuery({
+    queryKey: ["members"],
+    queryFn: fetchMembers,
+  });
+}
+```
+
+---
+
+## Data Fetching
+
+- Never fetch directly inside components without a hook.
+- Always wrap Supabase calls in service or hook layer.
+
+Bad:
+
+```ts
+useEffect(() => {
+  supabase.from("persons").select("*");
+}, []);
+```
+
+Good:
+
+```ts
+const { data } = usePersons();
+```
+
+---
+
+## Component Design
+
+- Prefer **presentational components** + **container logic separation**.
+- Avoid mixing API calls with UI rendering.
+- Keep props minimal and explicit.
+
+---
+
+## Performance Rules
+
+- Avoid unnecessary re-renders.
+- Use `useMemo` only when needed.
+- Use `useCallback` for stable function references when passing props.
+- Avoid premature optimization.
+
+---
+
+## UI Integration
+
+- Always use **shadcn/ui components** instead of custom UI.
+- Use `cn()` for conditional class names.
+- Keep Tailwind classes readable.
+
+---
+
+## Anti-patterns (DO NOT DO)
+
+- ❌ Large components (>200 lines)
+- ❌ Direct Supabase calls in UI
+- ❌ Heavy logic inside JSX
+- ❌ Prop drilling across many levels
+- ❌ Using state for derived values
+
+---
+
+## Folder Pattern
+
+Feature-based structure:
+
+```
+features/
+  members/
+    useMembers.ts
+    MemberCard.tsx
+    member-service.ts
+```
+
+---
+
+## Goal
+
+Write React code that is:
+
+- Declarative
+- Reusable
+- Easy to test
+- Easy to refactor
+- Consistent across the project

@@ -1,0 +1,120 @@
+---
+description: TypeScript coding standards
+alwaysApply: true
+---
+
+# TypeScript Rules
+
+## General Principles
+
+- Use **TypeScript strict mode** always.
+- Never use `any`. If absolutely necessary, use `unknown` and narrow it.
+- Prefer `type` over `interface` unless declaration merging is required.
+- Keep types explicit for public APIs and function returns.
+
+---
+
+## Naming Conventions
+
+- `camelCase` → variables, functions
+- `PascalCase` → components, types, classes
+- `UPPER_SNAKE_CASE` → constants
+- `kebab-case` → file and folder names
+
+---
+
+## Types & Safety
+
+- Always define return types for functions in shared modules.
+- Avoid implicit `any`.
+- Use union types instead of enums when possible.
+
+Example:
+
+```ts
+type UserRole = "owner" | "admin" | "editor" | "viewer";
+```
+
+- Prefer `readonly` when data should not mutate.
+
+---
+
+## Functions
+
+- Prefer pure functions when possible.
+- Avoid side effects inside utility functions.
+- Keep functions small and single-purpose.
+
+Example:
+
+```ts
+function formatFullName(first: string, last: string): string {
+  return `${first} ${last}`;
+}
+```
+
+---
+
+## Objects & Data
+
+- Use typed objects for all domain models.
+- Avoid loosely structured objects.
+
+Example:
+
+```ts
+type Person = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  birthDate?: string;
+};
+```
+
+---
+
+## Error Handling
+
+- Never ignore errors.
+- Prefer explicit error handling over silent failures.
+
+Example:
+
+```ts
+try {
+  await supabase.from("persons").select("*");
+} catch (error) {
+  console.error(error);
+}
+```
+
+---
+
+## Imports
+
+- Group imports in order:
+  1. React / Next.js
+  2. External libraries
+  3. Internal modules
+  4. Types
+
+---
+
+## Anti-patterns (DO NOT DO)
+
+- ❌ `any` usage
+- ❌ Non-typed function returns in shared logic
+- ❌ Large unstructured objects
+- ❌ Mixing business logic inside UI components
+- ❌ Deep nested types without extraction
+
+---
+
+## Goal
+
+Write TypeScript that is:
+
+- Safe
+- Predictable
+- Easy to refactor
+- Consistent across the codebase

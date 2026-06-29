@@ -1,0 +1,159 @@
+---
+description: UI standards using shadcn/ui and Tailwind
+alwaysApply: true
+---
+
+# UI Rules
+
+## Core Principles
+
+- Always use **shadcn/ui components** when available.
+- Never rebuild components that already exist in shadcn/ui.
+- Prefer **composition over custom UI implementation**.
+- UI must be consistent across the entire app.
+
+---
+
+## Design System
+
+- Use **Tailwind CSS only** for styling.
+- Avoid inline styles.
+- Do not introduce custom CSS files unless necessary.
+- Use design tokens from shadcn/ui.
+
+---
+
+## Component Usage
+
+Preferred components:
+
+- Button
+- Input
+- Card
+- Dialog
+- Dropdown Menu
+- Tabs
+- Table
+- Badge
+- Avatar
+- Skeleton
+- Tooltip
+- Sheet
+- Select
+
+Example:
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+export function Example() {
+  return <Button>Click me</Button>;
+}
+```
+
+---
+
+## Class Management
+
+- Use `cn()` utility for conditional classes.
+- Avoid string concatenation for className.
+
+Example:
+
+```ts
+className={cn("flex items-center", isActive && "text-blue-500")}
+```
+
+---
+
+## Icons
+
+- Use **Lucide React** for all icons.
+- Do not use custom SVGs unless necessary.
+
+Example:
+
+```tsx
+import { User } from "lucide-react";
+```
+
+---
+
+## Layout Rules
+
+- Use flex and grid instead of manual positioning.
+- Prefer responsive design by default.
+- Mobile-first approach.
+
+---
+
+## Form UI
+
+- Use `react-hook-form` + `zod`.
+- Always use shadcn/ui form components.
+- Show validation errors clearly.
+
+---
+
+## Accessibility
+
+- All interactive elements must be accessible.
+- Ensure:
+  - keyboard navigation works
+  - aria labels exist when needed
+  - focus states are visible
+
+---
+
+## Visual Consistency
+
+- Maintain consistent:
+  - spacing (Tailwind scale)
+  - font sizes
+  - border radius
+  - button styles
+- Avoid random custom styles per page.
+
+---
+
+## Component Structure
+
+- Prefer reusable UI components in:
+
+```
+components/ui/
+components/shared/
+```
+
+- Do not duplicate UI logic across features.
+
+---
+
+## Dark Mode
+
+- Support dark mode by default (shadcn/ui standard).
+- Do not hardcode colors.
+- Use theme-aware classes.
+
+---
+
+## Anti-patterns (DO NOT DO)
+
+- ❌ Rebuilding shadcn components manually
+- ❌ Using random custom CSS per page
+- ❌ Inline styles (`style={{}}`)
+- ❌ Inconsistent button styles across pages
+- ❌ SVG icons scattered across codebase
+- ❌ Overusing div instead of proper UI components
+
+---
+
+## Goal
+
+Build UI that is:
+
+- Consistent
+- Accessible
+- Reusable
+- Maintainable
+- Aligned with shadcn/ui system

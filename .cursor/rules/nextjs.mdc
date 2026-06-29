@@ -1,0 +1,179 @@
+---
+description: Next.js App Router standards
+alwaysApply: true
+---
+
+# Next.js Rules
+
+## Core Principles
+
+- Use **App Router only** (`app/` directory).
+- Prefer **Server Components by default**.
+- Use **Client Components only when necessary**.
+
+---
+
+## Rendering Strategy
+
+- Default to Server Components.
+- Use `"use client"` only when needed:
+  - useState
+  - useEffect
+  - event handlers
+  - browser APIs
+
+Example:
+
+```tsx
+"use client";
+
+export default function Button() {
+  const [count, setCount] = useState(0);
+
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+---
+
+## Data Fetching
+
+- Fetch data in Server Components when possible.
+- Use Supabase server client in server layer.
+- Use React Query only for client-side needs.
+
+Bad:
+
+```tsx
+useEffect(() => {
+  fetch("/api/persons");
+}, []);
+```
+
+Good:
+
+```tsx
+export default async function Page() {
+  const data = await getPersons();
+  return <div>{data.length}</div>;
+}
+```
+
+---
+
+## Folder Structure (App Router)
+
+```
+app/
+  layout.tsx
+  page.tsx
+  (routes)/
+    members/
+      page.tsx
+      [id]/
+        page.tsx
+```
+
+- Use route groups `( )` for organization
+- Use dynamic routes `[id]`
+- Use nested layouts when needed
+
+---
+
+## API Routes (Route Handlers)
+
+- Use `route.ts` for backend endpoints.
+- Prefer Supabase RPC instead of heavy API logic.
+
+Example:
+
+```
+app/api/members/route.ts
+```
+
+---
+
+## Server Actions
+
+- Use Server Actions for mutations when possible.
+- Keep logic close to UI when it improves simplicity.
+
+Example:
+
+```ts
+"use server";
+
+export async function createMember(data: FormData) {
+  await supabase.from("persons").insert(data);
+}
+```
+
+---
+
+## Caching & Performance
+
+- Use Next.js caching strategies correctly:
+  - `force-cache` for static data
+  - `no-store` for dynamic data
+- Use `revalidate` when needed.
+
+Example:
+
+```ts
+fetch(url, { cache: "no-store" });
+```
+
+---
+
+## Metadata
+
+- Use `metadata` API for SEO.
+- Always define page metadata.
+
+Example:
+
+```ts
+export const metadata = {
+  title: "Family Tree",
+  description: "Manage your family tree",
+};
+```
+
+---
+
+## Navigation
+
+- Use `next/navigation`:
+  - `useRouter`
+  - `useParams`
+  - `usePathname`
+
+Avoid old `next/router`.
+
+---
+
+## Error Handling
+
+- Use `error.tsx` for route-level errors.
+- Use `not-found.tsx` for missing data pages.
+
+---
+
+## Anti-patterns (DO NOT DO)
+
+- ❌ Mixing server + client logic in one component unnecessarily
+- ❌ Using `useEffect` for data fetching in App Router
+- ❌ Overusing Client Components
+- ❌ Putting business logic inside pages
+- ❌ Ignoring caching strategy
+
+---
+
+## Goal
+
+Write Next.js code that is:
+
+- Server-first
+- Performance optimized
+- Cleanly separated
+- Scalable for large apps
