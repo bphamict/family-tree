@@ -1,670 +1,229 @@
-# Family Tree Management System - Development Roadmap (Supabase Edition)
+# Project Plan
 
 ## Overview
 
-This document outlines the architecture, database design, development roadmap, and best practices for building a modern Family Tree Management System using **Supabase** as the backend platform.
+This document defines the development plan for the Family Tree Management System.
 
-### Technology Stack
-
-| Layer          | Technology               |
-| -------------- | ------------------------ |
-| Frontend       | Next.js                  |
-| UI             | Tailwind CSS + shadcn/ui |
-| Data Fetching  | React Query              |
-| Forms          | React Hook Form + Zod    |
-| Backend        | Supabase                 |
-| Database       | PostgreSQL               |
-| Authentication | Supabase Auth            |
-| Storage        | Supabase Storage         |
-| Realtime       | Supabase Realtime        |
+The project is built incrementally, starting from core infrastructure to advanced genealogy features.
 
 ---
 
-# System Architecture
+## Goals
 
-```text
-                    Next.js
-                       │
-      React Query + Supabase Client
-                       │
-               Supabase Platform
-                       │
- ┌────────────────────────────────────────┐
- │ PostgreSQL Database                    │
- │ Authentication                         │
- │ Storage                                │
- │ Realtime                               │
- │ Edge Functions                         │
- └────────────────────────────────────────┘
-```
-
-This architecture is suitable for small to medium-sized applications and can later be extended with a dedicated backend (e.g., NestJS) if business logic becomes more complex.
+- Build a scalable family tree system
+- Support multi-family (multi-tenant)
+- Ensure secure data with Supabase RLS
+- Enable relationship-based genealogy model
+- Provide interactive visualization
 
 ---
 
-# Phase 1 - Authentication
-
-Use **Supabase Auth** for user authentication.
-
-## User Roles
-
-* Super Admin
-* Family Admin
-* Editor
-* Viewer
-
-## Profiles Table
-
-```text
-profiles
-
-id (uuid)
-user_id
-full_name
-avatar_url
-created_at
-updated_at
-```
+## Development Phases
 
 ---
 
-# Phase 2 - Database Design
+## Phase 1: Project Setup
 
-## families
+**Goal:** Initialize core infrastructure
 
-Represents a family or clan.
+Tasks:
 
-```text
-id
-name
-description
-created_at
-updated_at
-```
+- Setup Next.js project (App Router)
+- Setup Supabase project
+- Configure environment variables
+- Setup folder structure
+- Configure TypeScript + ESLint
+- Setup shadcn/ui
+- Setup Cursor rules
 
----
+Output:
 
-## branches
-
-Represents a branch within a family.
-
-```text
-id
-family_id
-parent_branch_id
-name
-description
-created_at
-updated_at
-```
-
-Supports unlimited hierarchical levels.
+- Running base app
+- Connected Supabase
 
 ---
 
-## persons
+## Phase 2: Authentication System
 
-Stores information about each individual.
+**Goal:** Enable user login & identity
 
-```text
-id
-family_id
-branch_id
+Tasks:
 
-first_name
-middle_name
-last_name
+- Supabase Auth setup
+- Login / Register UI
+- Session management
+- Protected routes
+- User profile table
 
-gender
+Output:
 
-birth_date
-death_date
-
-birth_place
-death_place
-
-occupation
-
-biography
-
-avatar_url
-
-created_at
-updated_at
-```
-
-### Important
-
-Avoid storing:
-
-```text
-father_id
-mother_id
-```
-
-Instead, use a dedicated relationship table.
+- Users can sign in/out securely
 
 ---
 
-## relationships
+## Phase 3: Family Management
 
-Stores all family relationships.
+**Goal:** Multi-tenant family system
 
-```text
-id
+Tasks:
 
-person1_id
-person2_id
+- Create families table
+- Membership system (roles)
+- Invite users to family
+- Switch between families
+- RLS policies for isolation
 
-relationship_type
+Output:
 
-start_date
-end_date
-
-note
-
-created_at
-```
-
-### Relationship Types
-
-* Parent
-* Child
-* Spouse
-* Adoptive Parent
-* Guardian
-
-This flexible approach supports:
-
-* Multiple marriages
-* Adoption
-* Guardianship
-* Complex family structures
+- Users belong to families securely
 
 ---
 
-## events
+## Phase 4: Member Management
 
-Stores family events.
+**Goal:** Manage family members
 
-```text
-id
+Tasks:
 
-family_id
+- Create persons table
+- CRUD members
+- Upload avatar (Supabase Storage)
+- Basic profile page
+- Search members
 
-title
+Output:
 
-type
-
-event_date
-
-location
-
-description
-
-created_at
-```
-
-Examples:
-
-* Birth
-* Death
-* Wedding
-* Memorial Day
-* Family Reunion
+- Family members can be managed
 
 ---
 
-## event_members
+## Phase 5: Relationship System
 
-Links people to events.
+**Goal:** Build genealogy model
 
-```text
-event_id
+Tasks:
 
-person_id
-```
+- Create relationships table
+- Support:
+  - parent-child
+  - spouse
+  - adoption
+- Relationship service layer
+- Validation rules
 
----
+Output:
 
-## documents
-
-Stores uploaded files.
-
-```text
-id
-
-person_id
-
-title
-
-storage_path
-
-type
-
-created_at
-```
-
-Supported document types:
-
-* Images
-* PDF
-* Birth Certificate
-* Marriage Certificate
-* Videos
+- Graph-based family relationships
 
 ---
 
-# Phase 3 - Storage Structure
+## Phase 6: Family Tree Visualization
 
-Use **Supabase Storage**.
+**Goal:** Visual representation
 
-Suggested buckets:
+Tasks:
 
-```text
-avatars/
-documents/
-family/
-grave/
-marriage/
-```
+- Tree rendering UI
+- Zoom / pan support
+- Expand / collapse nodes
+- Lazy loading large trees
+- Optimize rendering performance
 
-Example structure:
+Output:
 
-```text
-avatars/person-001.jpg
-
-documents/family-book.pdf
-
-grave/grave-001.jpg
-```
+- Interactive family tree UI
 
 ---
 
-# Phase 4 - Authorization (Row Level Security)
+## Phase 7: Events & Timeline
 
-Enable **Row Level Security (RLS)** from the beginning.
+**Goal:** Add historical context
 
-Users should only access data belonging to their family.
+Tasks:
 
-Example policy:
+- Events table
+- Birth / death / marriage events
+- Timeline UI
+- Link events to persons
 
-```sql
-family_id IN (
-    SELECT family_id
-    FROM memberships
-    WHERE user_id = auth.uid()
-)
-```
+Output:
 
----
-
-# Phase 5 - Membership
-
-Allow users to manage multiple families.
-
-```text
-memberships
-
-id
-
-user_id
-
-family_id
-
-role
-
-created_at
-```
-
-Available roles:
-
-* Owner
-* Admin
-* Editor
-* Viewer
+- Chronological family history
 
 ---
 
-# Phase 6 - User Interface
+## Phase 8: Documents & Media
 
-Suggested navigation:
+**Goal:** Store family records
 
-```text
-Dashboard
-│
-├── Families
-├── Branches
-├── Members
-├── Family Tree
-├── Timeline
-├── Events
-├── Documents
-└── Settings
-```
+Tasks:
+
+- Supabase Storage integration
+- Upload images, PDFs
+- Attach documents to persons/events
+- Media gallery UI
+
+Output:
+
+- Family archive system
 
 ---
 
-# Phase 7 - Family Tree Rendering
+## Phase 9: Search & Optimization
 
-Avoid loading the entire family tree at once.
+**Goal:** Improve performance & UX
 
-Recommended loading strategy:
+Tasks:
 
-```text
-Load selected person
-        │
-        ▼
-Load parents
-        │
-        ▼
-Load spouses
-        │
-        ▼
-Load children
-        │
-        ▼
-Render graph
-```
+- Full-text search
+- Index optimization
+- RPC queries for tree traversal
+- Pagination & lazy loading
+- Caching strategies
 
-Use lazy loading for better performance.
+Output:
 
-Recommended libraries:
-
-* React Flow
-* D3.js (advanced customization)
+- Fast and scalable system
 
 ---
 
-# Phase 8 - SQL Views
+## Phase 10: Advanced Features (Optional)
 
-Create SQL Views to simplify common queries.
-
-Example:
-
-```sql
-family_tree_view
-```
-
-The view should join:
-
-* Person
-* Parents
-* Children
-* Spouses
-
-Frontend query:
-
-```sql
-SELECT *
-FROM family_tree_view;
-```
+- QR code for members
+- AI relationship suggestions
+- Public family tree sharing
+- Multi-language support
+- Export to PDF / GEDCOM
 
 ---
 
-# Phase 9 - PostgreSQL Functions (RPC)
+## Milestone Strategy
 
-Complex queries should be implemented as PostgreSQL Functions and exposed through Supabase RPC.
+Each phase must:
 
-Recommended functions:
-
-```text
-rpc_get_family_tree()
-
-rpc_get_ancestors()
-
-rpc_get_descendants()
-
-rpc_search_person()
-
-rpc_family_statistics()
-```
-
-Example:
-
-```typescript
-const { data } = await supabase.rpc("rpc_get_ancestors", {
-  person_id: id,
-});
-```
-
-Advantages:
-
-* Better performance
-* Less network traffic
-* Centralized business logic
-* Easier maintenance
+1. Be fully completed
+2. Be tested manually
+3. Be reviewed before moving to next phase
+4. Not mix multiple phases at once
 
 ---
 
-# Phase 10 - Realtime
+## Development Rules
 
-Use Supabase Realtime to automatically synchronize:
-
-* New family members
-* Updated profiles
-* Uploaded photos
-* Family events
-* Timeline changes
-
-No manual page refresh required.
+- Follow `.cursor/rules/*`
+- Always implement feature-by-feature
+- Do not skip phases
+- Prefer simplicity over premature optimization
+- Use Supabase as backend of record
 
 ---
 
-# Recommended Development Roadmap
-
-## Sprint 1
-
-### Foundation
-
-* Initialize Supabase
-* Configure Authentication
-* User Profiles
-
-Deliverable:
-
-* User login
-* User profile management
-
----
-
-## Sprint 2
-
-### Family Management
-
-* Families
-* Branches
-* Memberships
-* Role management
-
-Deliverable:
-
-* Multi-family support
-
----
-
-## Sprint 3
-
-### Family Members
-
-* Person management
-* Relationship management
-
-Deliverable:
-
-* CRUD for family members
-
----
-
-## Sprint 4
-
-### Family Tree
-
-* Graph visualization
-* Expand/collapse nodes
-* Search members
-* Lazy loading
-
-Deliverable:
-
-* Interactive family tree
-
----
-
-## Sprint 5
-
-### Timeline & Events
-
-* Family events
-* Timeline
-* Memorial dates
-* Birthdays
-
-Deliverable:
-
-* Historical timeline
-
----
-
-## Sprint 6
-
-### File Management
-
-* Avatar upload
-* Documents
-* Photos
-
-Deliverable:
-
-* Media management
-
----
-
-## Sprint 7
-
-### Security
-
-* Row Level Security
-* Audit Logs
-* Activity History
-
-Deliverable:
-
-* Secure multi-tenant system
-
----
-
-## Sprint 8
-
-### Import & Export
-
-* CSV Import
-* Excel Import
-* PDF Export
-* Excel Export
-
-Deliverable:
-
-* Data migration support
-
----
-
-# Best Practices
-
-## 1. Never Store Parent IDs Directly
-
-Avoid:
-
-```text
-father_id
-mother_id
-```
-
-Instead:
-
-```text
-relationships
-```
-
-Benefits:
-
-* Supports multiple marriages
-* Adoption
-* Guardianship
-* Future extensibility
-
----
-
-## 2. Keep Business Logic in PostgreSQL
-
-Use:
-
-* Recursive CTE
-* SQL Views
-* PostgreSQL Functions (RPC)
-
-Avoid implementing complex family tree algorithms on the frontend.
-
----
-
-## 3. Enable RLS Early
-
-Design all tables with Row Level Security from the beginning to avoid major refactoring later.
-
----
-
-## 4. Use Lazy Loading
-
-Family trees can become very large.
-
-Only load:
-
-* Parents
-* Children
-* Spouses
-* Nearby relatives
-
-instead of the entire dataset.
-
----
-
-## 5. Organize Storage
-
-Separate uploaded files into dedicated folders or buckets:
-
-```text
-avatars/
-documents/
-events/
-grave/
-family/
-```
-
----
-
-# Future Enhancements
-
-* QR Code for each family member
-* Family Timeline
-* Cemetery Management
-* Interactive Relationship Graph
-* AI-powered Relationship Detection
-* GEDCOM Import/Export
-* Multi-language Support
-* Mobile Application
-* Notifications for Birthdays and Memorial Days
-* Offline Support
-* Version History
-* Audit Logs
-* Public Family Tree Sharing
-* Printable Family Books (PDF)
-
----
-
-# Conclusion
-
-Supabase provides an excellent foundation for building a modern Family Tree Management System. Its built-in PostgreSQL database, authentication, storage, realtime capabilities, and Row Level Security significantly reduce backend development time while maintaining scalability.
-
-For advanced features such as ancestor traversal, descendant lookup, or relationship graphs, leverage PostgreSQL Functions (RPC), Recursive CTEs, and SQL Views instead of moving complex logic to the frontend.
-
-This architecture is production-ready, scalable, and can evolve into a full-featured genealogy platform without requiring major architectural changes.
+## Success Definition
+
+The project is considered successful when:
+
+- Users can create and manage families
+- Relationships are correctly modeled
+- Family tree is visually interactive
+- Data is secure (RLS enforced)
+- System is scalable for large families
