@@ -61,15 +61,10 @@ The system is designed to be scalable, secure, and easy to maintain by leveragin
 docs/
 ├── PROJECT_PLAN.md
 ├── REQUIREMENTS.md
-├── SYSTEM_ARCHITECTURE.md
-├── DATABASE_DESIGN.md
-├── API_SPECIFICATION.md
-├── AUTHORIZATION.md
-├── DEVELOPMENT_ROADMAP.md
-└── DEPLOYMENT.md
+└── DATABASE_DESIGN.md
 
-apps/
-├── web/
+src/
+├── app/
 
 supabase/
 ├── migrations/
