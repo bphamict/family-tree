@@ -73,7 +73,9 @@ function mapParticipants(members: EventMemberRow[] | null): EventParticipant[] {
     }));
 }
 
-function mapEventWithParticipants(row: EventWithMembersRow): EventWithParticipants {
+function mapEventWithParticipants(
+  row: EventWithMembersRow,
+): EventWithParticipants {
   return {
     ...mapEvent(row),
     participants: mapParticipants(row.event_members),

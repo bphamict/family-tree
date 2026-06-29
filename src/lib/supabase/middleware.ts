@@ -8,7 +8,9 @@ import {
 import { getPublicEnv } from "@/lib/env";
 import type { Database } from "@/types/database";
 
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
+export async function updateSession(
+  request: NextRequest,
+): Promise<NextResponse> {
   let supabaseResponse = NextResponse.next({
     request,
   });

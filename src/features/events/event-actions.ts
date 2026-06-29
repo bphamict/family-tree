@@ -6,11 +6,13 @@ import { redirect } from "next/navigation";
 import { getFamilyById } from "@/features/families/family-service";
 import {
   createEventSchema,
-  updateEventSchema,
+  createUpdateEventSchema,
 } from "@/features/events/event-schemas";
 import { getEventById } from "@/features/events/event-service";
 import { requireUser } from "@/lib/auth/require-user";
 import { canManageEvents } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
+import { getEventValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/server";
 
 type ActionResult = {
@@ -50,11 +52,12 @@ function toEventPayload(input: {
 }
 
 async function requireEventManagement(familyId: string) {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManageEvents(family.membership.role)) {
-    return { error: "You do not have permission to manage events." };
+    return { error: t("event.errors.manage") };
   }
 
   return { family };
@@ -113,16 +116,22 @@ export async function createEventAction(
   familyId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getEventValidationMessages(t);
   const permission = await requireEventManagement(familyId);
 
   if ("error" in permission && permission.error) {
     return { error: permission.error };
   }
 
-  const parsed = createEventSchema.safeParse(parseEventFormData(formData));
+  const parsed = createEventSchema(validationMessages).safeParse(
+    parseEventFormData(formData),
+  );
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -160,6 +169,8 @@ export async function updateEventAction(
   eventId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getEventValidationMessages(t);
   const permission = await requireEventManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -169,13 +180,17 @@ export async function updateEventAction(
   const existing = await getEventById(familyId, eventId);
 
   if (!existing) {
-    return { error: "Event not found." };
+    return { error: t("event.errors.notFound") };
   }
 
-  const parsed = updateEventSchema.safeParse(parseEventFormData(formData));
+  const parsed = createUpdateEventSchema(validationMessages).safeParse(
+    parseEventFormData(formData),
+  );
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -210,7 +225,7 @@ export async function updateEventAction(
     personIds: affectedPersonIds,
   });
 
-  return { success: "Event updated successfully." };
+  return { success: t("event.toast.updated") };
 }
 
 export async function deleteEventAction(
@@ -237,7 +252,9 @@ export async function deleteEventAction(
   }
 
   revalidateEventPaths(familyId, {
-    personIds: existing?.participants.map((participant) => participant.person_id),
+    personIds: existing?.participants.map(
+      (participant) => participant.person_id,
+    ),
   });
   redirect(`/families/${familyId}/timeline`);
 }

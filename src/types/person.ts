@@ -7,6 +7,7 @@ export type Person = {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  other_name: string | null;
   gender: PersonGender | null;
   birth_date: string | null;
   death_date: string | null;
@@ -27,8 +28,10 @@ export type PersonSearchFilters = {
   includeArchived?: boolean;
 };
 
-export function formatPersonName(person: Pick<Person, "first_name" | "middle_name" | "last_name">): string {
-  return [person.first_name, person.middle_name, person.last_name]
+export function formatPersonName(
+  person: Pick<Person, "first_name" | "middle_name" | "last_name">,
+): string {
+  return [person.last_name, person.middle_name, person.first_name]
     .filter(Boolean)
     .join(" ");
 }

@@ -1,4 +1,5 @@
 import { DocumentCard } from "@/features/documents/document-card";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { Document } from "@/types/document";
 
 type DocumentGalleryProps = {
@@ -7,17 +8,17 @@ type DocumentGalleryProps = {
   canManage: boolean;
 };
 
-export function DocumentGallery({
+export async function DocumentGallery({
   familyId,
   documents,
   canManage,
 }: DocumentGalleryProps) {
+  const t = await getTranslations();
+
   if (documents.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-muted-foreground">
-          No documents match your filters yet.
-        </p>
+        <p className="text-muted-foreground">{t("document.empty")}</p>
       </div>
     );
   }

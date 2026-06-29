@@ -150,6 +150,7 @@ export type Database = {
           first_name: string;
           middle_name: string | null;
           last_name: string;
+          other_name: string | null;
           gender: string | null;
           birth_date: string | null;
           death_date: string | null;
@@ -167,6 +168,7 @@ export type Database = {
           first_name: string;
           middle_name?: string | null;
           last_name: string;
+          other_name?: string | null;
           gender?: string | null;
           birth_date?: string | null;
           death_date?: string | null;
@@ -184,6 +186,7 @@ export type Database = {
           first_name?: string;
           middle_name?: string | null;
           last_name?: string;
+          other_name?: string | null;
           gender?: string | null;
           birth_date?: string | null;
           death_date?: string | null;
@@ -212,6 +215,7 @@ export type Database = {
           relationship_type: string;
           start_date: string | null;
           end_date: string | null;
+          birth_order: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -222,6 +226,7 @@ export type Database = {
           relationship_type: string;
           start_date?: string | null;
           end_date?: string | null;
+          birth_order?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -232,6 +237,7 @@ export type Database = {
           relationship_type?: string;
           start_date?: string | null;
           end_date?: string | null;
+          birth_order?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -441,8 +447,15 @@ export type Database = {
           p_relationship_type: string;
           p_start_date?: string | null;
           p_end_date?: string | null;
+          p_birth_order?: number | null;
         };
         Returns: string;
+      };
+      next_child_birth_order: {
+        Args: {
+          p_parent_id: string;
+        };
+        Returns: number;
       };
       would_create_parent_cycle: {
         Args: {

@@ -1,4 +1,4 @@
-import { RELATIONSHIP_TYPE_LABELS } from "@/lib/relationship/constants";
+import { sortChildRelationships } from "@/lib/relationship/birth-order";
 import type {
   PersonRelationshipGroups,
   PersonRelationshipView,
@@ -44,6 +44,9 @@ export function groupRelationshipsForPerson(
     groups[view.group].push(view.item);
   }
 
+  groups.children = sortChildRelationships(groups.children);
+  groups.wards = sortChildRelationships(groups.wards);
+
   return groups;
 }
 
@@ -54,7 +57,10 @@ function toRelationshipView(
     person1: RelationshipPerson | null;
     person2: RelationshipPerson | null;
   },
-): { group: keyof PersonRelationshipGroups; item: PersonRelationshipView } | null {
+): {
+  group: keyof PersonRelationshipGroups;
+  item: PersonRelationshipView;
+} | null {
   const { relationship, person1, person2 } = entry;
 
   if (!person1 || !person2) {
@@ -63,14 +69,16 @@ function toRelationshipView(
 
   if (relationship.relationship_type === "spouse") {
     const relatedPerson =
-      relationship.person1_id === personId ? mapPerson(person2) : mapPerson(person1);
+      relationship.person1_id === personId
+        ? mapPerson(person2)
+        : mapPerson(person1);
 
     return {
       group: "spouses",
       item: {
         relationship,
         relatedPerson,
-        displayLabel: RELATIONSHIP_TYPE_LABELS.spouse,
+        displayLabelKey: "relationship.types.spouse",
       },
     };
   }
@@ -85,7 +93,7 @@ function toRelationshipView(
         item: {
           relationship,
           relatedPerson: mapPerson(person1),
-          displayLabel: RELATIONSHIP_TYPE_LABELS[relationship.relationship_type],
+          displayLabelKey: `relationship.types.${relationship.relationship_type}`,
         },
       };
     }
@@ -96,10 +104,10 @@ function toRelationshipView(
         item: {
           relationship,
           relatedPerson: mapPerson(person2),
-          displayLabel:
+          displayLabelKey:
             relationship.relationship_type === "adoptive_parent"
-              ? "Adopted child"
-              : "Child",
+              ? "relationship.display.adopted_child"
+              : "relationship.display.child",
         },
       };
     }
@@ -112,7 +120,7 @@ function toRelationshipView(
         item: {
           relationship,
           relatedPerson: mapPerson(person1),
-          displayLabel: RELATIONSHIP_TYPE_LABELS.guardian,
+          displayLabelKey: "relationship.types.guardian",
         },
       };
     }
@@ -123,7 +131,7 @@ function toRelationshipView(
         item: {
           relationship,
           relatedPerson: mapPerson(person2),
-          displayLabel: "Ward",
+          displayLabelKey: "relationship.display.ward",
         },
       };
     }

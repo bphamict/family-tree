@@ -1,11 +1,7 @@
 import type { Person } from "@/types/person";
 
 export type RelationshipType =
-  | "parent"
-  | "child"
-  | "spouse"
-  | "adoptive_parent"
-  | "guardian";
+  "parent" | "child" | "spouse" | "adoptive_parent" | "guardian";
 
 export type StoredRelationshipType = Exclude<RelationshipType, "child">;
 
@@ -16,6 +12,7 @@ export type Relationship = {
   relationship_type: StoredRelationshipType;
   start_date: string | null;
   end_date: string | null;
+  birth_order: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -36,7 +33,7 @@ export type RelationshipPerson = Pick<
 export type PersonRelationshipView = {
   relationship: Relationship;
   relatedPerson: RelationshipPerson;
-  displayLabel: string;
+  displayLabelKey: string;
 };
 
 export type PersonRelationshipGroups = {

@@ -8,11 +8,11 @@ The application uses **PostgreSQL** (Supabase) as the primary database.
 
 Design goals:
 
-* Scalable
-* Flexible
-* Multi-tenant
-* Relationship-driven
-* Optimized for genealogy queries
+- Scalable
+- Flexible
+- Multi-tenant
+- Relationship-driven
+- Optimized for genealogy queries
 
 ---
 
@@ -36,7 +36,7 @@ Family B
 
 Most business tables include:
 
-* family_id
+- family_id
 
 ---
 
@@ -44,17 +44,17 @@ Most business tables include:
 
 Do **not** store:
 
-* father_id
-* mother_id
+- father_id
+- mother_id
 
 Instead, relationships are stored separately.
 
 Benefits:
 
-* Multiple marriages
-* Adoption
-* Guardianship
-* Future extensibility
+- Multiple marriages
+- Adoption
+- Guardianship
+- Future extensibility
 
 ---
 
@@ -126,10 +126,10 @@ Connect users to families.
 
 Roles:
 
-* owner
-* admin
-* editor
-* viewer
+- owner
+- admin
+- editor
+- viewer
 
 ---
 
@@ -189,11 +189,11 @@ Stores all relationships.
 
 Relationship Types:
 
-* parent
-* child
-* spouse
-* adoptive_parent
-* guardian
+- parent
+- child
+- spouse
+- adoptive_parent
+- guardian
 
 ---
 
@@ -205,10 +205,10 @@ Family events.
 
 Examples:
 
-* Birth
-* Death
-* Wedding
-* Reunion
+- Birth
+- Death
+- Wedding
+- Reunion
 
 ---
 
@@ -228,9 +228,9 @@ Uploaded files.
 
 Examples:
 
-* Photos
-* PDF
-* Certificates
+- Photos
+- PDF
+- Certificates
 
 ---
 
@@ -276,10 +276,10 @@ person2_id
 
 Examples:
 
-* Every person belongs to one family.
-* Every branch belongs to one family.
-* A relationship must connect two existing persons.
-* Relationship types are restricted to predefined values.
+- Every person belongs to one family.
+- Every branch belongs to one family.
+- A relationship must connect two existing persons.
+- Relationship types are restricted to predefined values.
 
 ---
 
@@ -287,28 +287,28 @@ Examples:
 
 Tables:
 
-* plural
-* snake_case
+- plural
+- snake_case
 
 Examples:
 
-* persons
-* relationships
-* memberships
+- persons
+- relationships
+- memberships
 
 Columns:
 
-* snake_case
+- snake_case
 
 Primary Keys:
 
-* id (UUID)
+- id (UUID)
 
 Foreign Keys:
 
-* family_id
-* person_id
-* branch_id
+- family_id
+- person_id
+- branch_id
 
 ---
 
@@ -316,20 +316,20 @@ Foreign Keys:
 
 Possible future additions:
 
-* cemeteries
-* graves
-* notifications
-* audit_logs
-* qr_codes
-* settings
-* tags
+- cemeteries
+- graves
+- notifications
+- audit_logs
+- qr_codes
+- settings
+- tags
 
 ---
 
 # Performance Considerations
 
-* Use UUID as primary keys.
-* Create indexes on frequently queried columns.
-* Use PostgreSQL Functions (RPC) for genealogy queries.
-* Use Recursive CTE for ancestor and descendant traversal.
-* Lazy-load large family trees instead of loading everything at once.
+- Use UUID as primary keys.
+- Create indexes on frequently queried columns.
+- Use PostgreSQL Functions (RPC) for genealogy queries.
+- Use Recursive CTE for ancestor and descendant traversal.
+- Lazy-load large family trees instead of loading everything at once.

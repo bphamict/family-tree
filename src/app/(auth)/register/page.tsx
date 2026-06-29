@@ -8,19 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { RegisterForm } from "@/features/auth/register-form";
+import { getTranslations } from "@/lib/i18n/translator";
 
-export const metadata: Metadata = {
-  title: "Create account",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("auth.registerTitle") };
+}
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const t = await getTranslations();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create account</CardTitle>
-        <CardDescription>
-          Register to start preserving and managing your family history.
-        </CardDescription>
+        <CardTitle>{t("auth.registerTitle")}</CardTitle>
+        <CardDescription>{t("auth.registerDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <RegisterForm />

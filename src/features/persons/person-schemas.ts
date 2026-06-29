@@ -2,56 +2,82 @@ import { z } from "zod";
 
 import { PERSON_GENDERS } from "@/lib/person/constants";
 
-const optionalDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date")
-  .optional()
-  .or(z.literal(""));
+type PersonValidationMessages = {
+  firstNameRequired: string;
+  lastNameRequired: string;
+  validDate: string;
+  validYear: string;
+  biographyTooLong: string;
+  occupationTooLong: string;
+  otherNameTooLong: string;
+  deathAfterBirth: string;
+};
 
-const personFieldsSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, "Last name is required"),
-  gender: z.enum(PERSON_GENDERS).optional(),
-  birthDate: optionalDate,
-  deathDate: optionalDate,
-  biography: z.string().max(5000, "Biography is too long").optional(),
-  occupation: z.string().max(200, "Occupation is too long").optional(),
-});
-
-export const createPersonSchema = personFieldsSchema.refine(
-  (data) => {
-    if (!data.birthDate || !data.deathDate) {
-      return true;
-    }
-
-    return data.deathDate >= data.birthDate;
-  },
-  {
-    message: "Death date must be on or after birth date",
-    path: ["deathDate"],
-  },
-);
-
-export const updatePersonSchema = createPersonSchema;
-
-export const personSearchSchema = z.object({
-  query: z.string().optional(),
-  gender: z.enum(PERSON_GENDERS).optional(),
-  birthYear: z
+function optionalDate(validDate: string) {
+  return z
     .string()
-    .regex(/^\d{4}$/, "Enter a valid year")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, validDate)
     .optional()
-    .or(z.literal("")),
-  deathYear: z
-    .string()
-    .regex(/^\d{4}$/, "Enter a valid year")
-    .optional()
-    .or(z.literal("")),
-  occupation: z.string().optional(),
-  includeArchived: z.coerce.boolean().optional(),
-});
+    .or(z.literal(""));
+}
 
-export type CreatePersonInput = z.infer<typeof createPersonSchema>;
-export type UpdatePersonInput = z.infer<typeof updatePersonSchema>;
-export type PersonSearchInput = z.infer<typeof personSearchSchema>;
+function personFieldsSchema(messages: PersonValidationMessages) {
+  return z.object({
+    firstName: z.string().min(1, messages.firstNameRequired),
+    middleName: z.string().optional(),
+    lastName: z.string().min(1, messages.lastNameRequired),
+    otherName: z.string().max(200, messages.otherNameTooLong).optional(),
+    gender: z.enum(PERSON_GENDERS).optional(),
+    birthDate: optionalDate(messages.validDate),
+    deathDate: optionalDate(messages.validDate),
+    biography: z.string().max(5000, messages.biographyTooLong).optional(),
+    occupation: z.string().max(200, messages.occupationTooLong).optional(),
+  });
+}
+
+export function createPersonSchema(messages: PersonValidationMessages) {
+  return personFieldsSchema(messages).refine(
+    (data) => {
+      if (!data.birthDate || !data.deathDate) {
+        return true;
+      }
+
+      return data.deathDate >= data.birthDate;
+    },
+    {
+      message: messages.deathAfterBirth,
+      path: ["deathDate"],
+    },
+  );
+}
+
+export function createUpdatePersonSchema(messages: PersonValidationMessages) {
+  return createPersonSchema(messages);
+}
+
+export function createPersonSearchSchema(messages: PersonValidationMessages) {
+  return z.object({
+    query: z.string().optional(),
+    gender: z.enum(PERSON_GENDERS).optional(),
+    birthYear: z
+      .string()
+      .regex(/^\d{4}$/, messages.validYear)
+      .optional()
+      .or(z.literal("")),
+    deathYear: z
+      .string()
+      .regex(/^\d{4}$/, messages.validYear)
+      .optional()
+      .or(z.literal("")),
+    occupation: z.string().optional(),
+    includeArchived: z.coerce.boolean().optional(),
+  });
+}
+
+export type CreatePersonInput = z.infer<ReturnType<typeof createPersonSchema>>;
+export type UpdatePersonInput = z.infer<
+  ReturnType<typeof createUpdatePersonSchema>
+>;
+export type PersonSearchInput = z.infer<
+  ReturnType<typeof createPersonSearchSchema>
+>;

@@ -7,6 +7,8 @@ import { getPersonById } from "@/features/persons/person-service";
 import { createRelationshipSchema } from "@/features/relationships/relationship-schemas";
 import { requireUser } from "@/lib/auth/require-user";
 import { canManagePersons } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
+import { getRelationshipValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/server";
 import type { CreateRelationshipType } from "@/lib/relationship/constants";
 import type { RelationshipType } from "@/types/relationship";
@@ -29,11 +31,12 @@ function revalidatePersonRelationshipPaths(
 }
 
 async function requireRelationshipManagement(familyId: string) {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManagePersons(family.membership.role)) {
-    return { error: "You do not have permission to manage relationships." };
+    return { error: t("relationship.errors.manage") };
   }
 
   return { family };
@@ -100,6 +103,8 @@ export async function createRelationshipAction(
   subjectPersonId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getRelationshipValidationMessages(t);
   const permission = await requireRelationshipManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -109,10 +114,10 @@ export async function createRelationshipAction(
   const subjectPerson = await getPersonById(familyId, subjectPersonId);
 
   if (!subjectPerson) {
-    return { error: "Person not found." };
+    return { error: t("person.errors.notFound") };
   }
 
-  const parsed = createRelationshipSchema.safeParse({
+  const parsed = createRelationshipSchema(validationMessages).safeParse({
     relatedPersonId: formData.get("relatedPersonId"),
     relationshipType: formData.get("relationshipType"),
     startDate: formData.get("startDate") || undefined,
@@ -120,17 +125,22 @@ export async function createRelationshipAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   if (parsed.data.relatedPersonId === subjectPersonId) {
-    return { error: "A person cannot have a relationship with themselves." };
+    return { error: t("relationship.errors.self") };
   }
 
-  const relatedPerson = await getPersonById(familyId, parsed.data.relatedPersonId);
+  const relatedPerson = await getPersonById(
+    familyId,
+    parsed.data.relatedPersonId,
+  );
 
   if (!relatedPerson) {
-    return { error: "Related person not found in this family." };
+    return { error: t("relationship.errors.relatedNotFound") };
   }
 
   const endpoints = resolveRelationshipEndpoints(
@@ -157,8 +167,9 @@ export async function createRelationshipAction(
     subjectPersonId,
     parsed.data.relatedPersonId,
   );
+  revalidatePath(`/families/${familyId}/tree`);
 
-  return { success: "Relationship added successfully." };
+  return { success: t("relationship.toast.added") };
 }
 
 export async function deleteRelationshipAction(
@@ -166,6 +177,7 @@ export async function deleteRelationshipAction(
   subjectPersonId: string,
   relationshipId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   const permission = await requireRelationshipManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -185,7 +197,7 @@ export async function deleteRelationshipAction(
   }
 
   if (!relationship) {
-    return { error: "Relationship not found." };
+    return { error: t("relationship.errors.notFound") };
   }
 
   const { error } = await supabase
@@ -203,6 +215,103 @@ export async function deleteRelationshipAction(
       : relationship.person1_id;
 
   revalidatePersonRelationshipPaths(familyId, subjectPersonId, relatedPersonId);
+  revalidatePath(`/families/${familyId}/tree`);
 
-  return { success: "Relationship removed successfully." };
+  return { success: t("relationship.toast.removed") };
+}
+
+export async function reorderChildBirthOrderAction(
+  familyId: string,
+  parentPersonId: string,
+  relationshipId: string,
+  direction: "up" | "down",
+): Promise<ActionResult> {
+  const t = await getTranslations();
+  const permission = await requireRelationshipManagement(familyId);
+
+  if ("error" in permission && permission.error) {
+    return { error: permission.error };
+  }
+
+  const supabase = await createClient();
+
+  const { data: siblings, error: siblingsError } = await supabase
+    .from("relationships")
+    .select("id, person1_id, person2_id, birth_order, relationship_type")
+    .eq("person1_id", parentPersonId)
+    .in("relationship_type", ["parent", "adoptive_parent", "guardian"])
+    .order("birth_order", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true });
+
+  if (siblingsError) {
+    return { error: siblingsError.message };
+  }
+
+  const orderedSiblings = siblings ?? [];
+  const currentIndex = orderedSiblings.findIndex(
+    (relationship) => relationship.id === relationshipId,
+  );
+
+  if (currentIndex === -1) {
+    return { error: t("relationship.errors.notFound") };
+  }
+
+  const normalizedSiblings = orderedSiblings.map((relationship, index) => ({
+    ...relationship,
+    birth_order: relationship.birth_order ?? index + 1,
+  }));
+
+  for (const relationship of normalizedSiblings) {
+    if (
+      orderedSiblings.find((item) => item.id === relationship.id)
+        ?.birth_order === null
+    ) {
+      const { error: normalizeError } = await supabase
+        .from("relationships")
+        .update({ birth_order: relationship.birth_order })
+        .eq("id", relationship.id);
+
+      if (normalizeError) {
+        return { error: normalizeError.message };
+      }
+    }
+  }
+
+  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+  const targetRelationship = normalizedSiblings[targetIndex];
+
+  if (!targetRelationship) {
+    return { error: t("relationship.errors.reorderBoundary") };
+  }
+
+  const currentRelationship = normalizedSiblings[currentIndex];
+  const currentOrder = currentRelationship.birth_order;
+  const targetOrder = targetRelationship.birth_order;
+
+  const { error: currentUpdateError } = await supabase
+    .from("relationships")
+    .update({ birth_order: targetOrder })
+    .eq("id", currentRelationship.id);
+
+  if (currentUpdateError) {
+    return { error: currentUpdateError.message };
+  }
+
+  const { error: targetUpdateError } = await supabase
+    .from("relationships")
+    .update({ birth_order: currentOrder })
+    .eq("id", targetRelationship.id);
+
+  if (targetUpdateError) {
+    return { error: targetUpdateError.message };
+  }
+
+  revalidatePersonRelationshipPaths(
+    familyId,
+    parentPersonId,
+    targetRelationship.person2_id,
+  );
+  revalidatePath(`/families/${familyId}/tree`);
+
+  return { success: t("relationship.toast.reordered") };
 }

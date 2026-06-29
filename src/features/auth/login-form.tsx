@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -18,19 +18,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  loginSchema,
+  createLoginSchema,
   type LoginInput,
 } from "@/features/auth/auth-schemas";
 import { signInWithEmail } from "@/features/auth/auth-service";
+import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function LoginForm() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const redirectTo = searchParams.get("redirect") ?? "/dashboard";
 
+  const validationMessages = useMemo(() => getAuthValidationMessages(t), [t]);
+  const schema = useMemo(
+    () => createLoginSchema(validationMessages),
+    [validationMessages],
+  );
+
   const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       email: "",
       password: "",
@@ -48,25 +57,28 @@ export function LoginForm() {
       return;
     }
 
-    toast.success("Signed in successfully");
+    toast.success(t("auth.signedIn"));
     router.push(redirectTo);
     router.refresh();
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("common.email")}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -81,12 +93,12 @@ export function LoginForm() {
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t("auth.password")}</FormLabel>
                 <Link
                   href="/forgot-password"
                   className="text-muted-foreground hover:text-foreground text-sm"
                 >
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
               <FormControl>
@@ -102,13 +114,16 @@ export function LoginForm() {
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting ? t("auth.signingIn") : t("common.signIn")}
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-foreground font-medium hover:underline">
-            Create one
+          {t("auth.noAccount")}{" "}
+          <Link
+            href="/register"
+            className="text-foreground font-medium hover:underline"
+          >
+            {t("auth.createOne")}
           </Link>
         </p>
       </form>

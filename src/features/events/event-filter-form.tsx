@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EVENT_TYPE_LABELS, EVENT_TYPES } from "@/lib/event/constants";
+import { EVENT_TYPES } from "@/lib/event/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { EventSearchFilters, EventType } from "@/types/event";
 
 type EventFilterFormProps = {
@@ -21,6 +22,7 @@ type EventFilterFormProps = {
 };
 
 export function EventFilterForm({ filters }: EventFilterFormProps) {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -55,7 +57,7 @@ export function EventFilterForm({ filters }: EventFilterFormProps) {
       }}
     >
       <div className="grid gap-2">
-        <Label htmlFor="eventType">Event type</Label>
+        <Label htmlFor="eventType">{t("event.eventType")}</Label>
         <Select
           value={filters.eventType ?? "all"}
           onValueChange={(value) =>
@@ -66,13 +68,13 @@ export function EventFilterForm({ filters }: EventFilterFormProps) {
           disabled={isPending}
         >
           <SelectTrigger id="eventType">
-            <SelectValue placeholder="All types" />
+            <SelectValue placeholder={t("common.allTypes")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="all">{t("common.allTypes")}</SelectItem>
             {EVENT_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
-                {EVENT_TYPE_LABELS[type]}
+                {t(`event.types.${type}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -80,11 +82,11 @@ export function EventFilterForm({ filters }: EventFilterFormProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="year">Year</Label>
+        <Label htmlFor="year">{t("common.year")}</Label>
         <Input
           id="year"
           name="year"
-          placeholder="e.g. 1990"
+          placeholder={t("event.yearPlaceholder")}
           defaultValue={filters.year ?? ""}
           disabled={isPending}
         />
@@ -92,16 +94,18 @@ export function EventFilterForm({ filters }: EventFilterFormProps) {
 
       <div className="flex items-end gap-2">
         <Button type="submit" disabled={isPending}>
-          Apply filters
+          {t("common.applyFilters")}
         </Button>
         {(filters.eventType || filters.year) && (
           <Button
             type="button"
             variant="outline"
             disabled={isPending}
-            onClick={() => updateFilters({ eventType: undefined, year: undefined })}
+            onClick={() =>
+              updateFilters({ eventType: undefined, year: undefined })
+            }
           >
-            Clear
+            {t("common.clear")}
           </Button>
         )}
       </div>

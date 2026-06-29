@@ -18,7 +18,8 @@ import {
   createPersonAction,
   updatePersonAction,
 } from "@/features/persons/person-actions";
-import { GENDER_LABELS, PERSON_GENDERS } from "@/lib/person/constants";
+import { PERSON_GENDERS } from "@/lib/person/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Person, PersonGender } from "@/types/person";
 
 type PersonFormProps = {
@@ -28,6 +29,7 @@ type PersonFormProps = {
 };
 
 export function PersonForm({ familyId, person, mode }: PersonFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [gender, setGender] = useState<PersonGender | undefined>(
     person?.gender ?? undefined,
@@ -59,7 +61,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-3">
         <div className="grid gap-2">
-          <Label htmlFor="firstName">First name</Label>
+          <Label htmlFor="firstName">{t("person.firstName")}</Label>
           <Input
             id="firstName"
             name="firstName"
@@ -70,7 +72,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="middleName">Middle name</Label>
+          <Label htmlFor="middleName">{t("person.middleName")}</Label>
           <Input
             id="middleName"
             name="middleName"
@@ -80,7 +82,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="lastName">Last name</Label>
+          <Label htmlFor="lastName">{t("person.lastName")}</Label>
           <Input
             id="lastName"
             name="lastName"
@@ -91,9 +93,19 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
         </div>
       </div>
 
+      <div className="grid gap-2">
+        <Label htmlFor="otherName">{t("person.otherName")}</Label>
+        <Input
+          id="otherName"
+          name="otherName"
+          defaultValue={person?.other_name ?? ""}
+          disabled={isPending}
+        />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         <div className="grid gap-2">
-          <Label htmlFor="gender">Gender</Label>
+          <Label htmlFor="gender">{t("person.gender")}</Label>
           <Select
             value={gender ?? ""}
             onValueChange={(value) =>
@@ -102,12 +114,12 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
             disabled={isPending}
           >
             <SelectTrigger id="gender">
-              <SelectValue placeholder="Select gender" />
+              <SelectValue placeholder={t("person.selectGender")} />
             </SelectTrigger>
             <SelectContent>
               {PERSON_GENDERS.map((option) => (
                 <SelectItem key={option} value={option}>
-                  {GENDER_LABELS[option]}
+                  {t(`person.genderLabels.${option}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -115,7 +127,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="birthDate">Birth date</Label>
+          <Label htmlFor="birthDate">{t("person.birthDate")}</Label>
           <Input
             id="birthDate"
             name="birthDate"
@@ -126,7 +138,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="deathDate">Death date</Label>
+          <Label htmlFor="deathDate">{t("person.deathDate")}</Label>
           <Input
             id="deathDate"
             name="deathDate"
@@ -138,7 +150,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="occupation">Occupation</Label>
+        <Label htmlFor="occupation">{t("person.occupation")}</Label>
         <Input
           id="occupation"
           name="occupation"
@@ -148,7 +160,7 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="biography">Biography</Label>
+        <Label htmlFor="biography">{t("person.biography")}</Label>
         <Textarea
           id="biography"
           name="biography"
@@ -161,11 +173,11 @@ export function PersonForm({ familyId, person, mode }: PersonFormProps) {
       <Button type="submit" disabled={isPending}>
         {isPending
           ? mode === "create"
-            ? "Creating..."
-            : "Saving..."
+            ? t("common.creating")
+            : t("common.saving")
           : mode === "create"
-            ? "Create person"
-            : "Save changes"}
+            ? t("person.createPerson")
+            : t("common.save")}
       </Button>
     </form>
   );

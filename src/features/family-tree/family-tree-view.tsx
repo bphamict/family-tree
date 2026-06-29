@@ -1,15 +1,18 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   getCanvasBounds,
-  getEdgePath,
+  getRenderedTreeEdges,
   layoutTree,
 } from "@/features/family-tree/tree-layout";
 import { FamilyTreeNodeCard } from "@/features/family-tree/family-tree-node";
 import { FamilyTreeToolbar } from "@/features/family-tree/family-tree-toolbar";
 import { useFamilyTree } from "@/features/family-tree/use-family-tree";
+import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { formatPersonName, type Person } from "@/types/person";
 import {
@@ -24,20 +27,28 @@ type FamilyTreeViewProps = {
   familyId: string;
   persons: Person[];
   initialRootPersonId: string;
+  className?: string;
 };
 
 const MIN_SCALE = 0.4;
 const MAX_SCALE = 2;
-const SCALE_STEP = 0.1;
+const BUTTON_ZOOM_STEP = 0.1;
+const WHEEL_ZOOM_SENSITIVITY = 0.004;
 
 export function FamilyTreeView({
   familyId,
   persons,
   initialRootPersonId,
+  className,
 }: FamilyTreeViewProps) {
+  const t = useTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
   const [rootPersonId, setRootPersonId] = useState(initialRootPersonId);
   const [ancestorDepth, setAncestorDepth] = useState(DEFAULT_ANCESTOR_DEPTH);
-  const [descendantDepth, setDescendantDepth] = useState(DEFAULT_DESCENDANT_DEPTH);
+  const [descendantDepth, setDescendantDepth] = useState(
+    DEFAULT_DESCENDANT_DEPTH,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [viewport, setViewport] = useState<TreeViewport>({
     x: 0,
@@ -47,7 +58,13 @@ export function FamilyTreeView({
   const [isPanning, setIsPanning] = useState(false);
   const panOrigin = useRef({ x: 0, y: 0 });
   const viewportOrigin = useRef({ x: 0, y: 0 });
+  const pendingPanPointerId = useRef<number | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const {
+    ref: containerRef,
+    isFullscreen,
+    toggle: toggleFullscreen,
+  } = useFullscreen<HTMLDivElement>();
 
   const { data, isLoading, isError, error } = useFamilyTree({
     familyId,
@@ -64,37 +81,45 @@ export function FamilyTreeView({
     return layoutTree(rootPersonId, data.nodes, data.edges);
   }, [data, rootPersonId]);
 
-  const layoutMap = useMemo(
-    () => new Map(layoutNodes.map((node) => [node.person.id, node])),
-    [layoutNodes],
-  );
-
   const bounds = useMemo(() => getCanvasBounds(layoutNodes), [layoutNodes]);
 
-  const visibleEdges = useMemo(() => {
+  const renderedEdges = useMemo(() => {
     if (!data) {
       return [];
     }
 
-    return data.edges.filter((edge) => {
-      const source = layoutMap.get(edge.sourceId);
-      const target = layoutMap.get(edge.targetId);
-      return source && target;
-    });
-  }, [data, layoutMap]);
+    return getRenderedTreeEdges(data.edges, layoutNodes, bounds);
+  }, [bounds, data, layoutNodes]);
 
   const handleWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault();
 
-    const direction = event.deltaY > 0 ? -1 : 1;
-    setViewport((current) => {
-      const nextScale = clamp(
-        current.scale + direction * SCALE_STEP,
-        MIN_SCALE,
-        MAX_SCALE,
-      );
+    const canvas = canvasRef.current;
 
-      return { ...current, scale: nextScale };
+    if (!canvas) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const pointerX = event.clientX - rect.left;
+    const pointerY = event.clientY - rect.top;
+    const deltaY = normalizeWheelDelta(event, rect.height);
+    const zoomFactor = Math.exp(-deltaY * WHEEL_ZOOM_SENSITIVITY);
+
+    setViewport((current) => {
+      const nextScale = clamp(current.scale * zoomFactor, MIN_SCALE, MAX_SCALE);
+
+      if (nextScale === current.scale) {
+        return current;
+      }
+
+      const scaleRatio = nextScale / current.scale;
+
+      return {
+        scale: nextScale,
+        x: pointerX - (pointerX - current.x) * scaleRatio,
+        y: pointerY - (pointerY - current.y) * scaleRatio,
+      };
     });
   }, []);
 
@@ -104,22 +129,38 @@ export function FamilyTreeView({
         return;
       }
 
-      setIsPanning(true);
+      const target = event.target as HTMLElement;
+
+      if (target.closest("button, a, input, select, textarea, [data-no-pan]")) {
+        return;
+      }
+
+      pendingPanPointerId.current = event.pointerId;
       panOrigin.current = { x: event.clientX, y: event.clientY };
       viewportOrigin.current = { x: viewport.x, y: viewport.y };
-      event.currentTarget.setPointerCapture(event.pointerId);
     },
     [viewport.x, viewport.y],
   );
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!isPanning) {
+      const isPendingPan = pendingPanPointerId.current === event.pointerId;
+
+      if (!isPanning && !isPendingPan) {
         return;
       }
 
       const deltaX = event.clientX - panOrigin.current.x;
       const deltaY = event.clientY - panOrigin.current.y;
+
+      if (!isPanning && isPendingPan) {
+        if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) {
+          return;
+        }
+
+        setIsPanning(true);
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
 
       setViewport((current) => ({
         ...current,
@@ -132,10 +173,14 @@ export function FamilyTreeView({
 
   const handlePointerUp = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      if (isPanning) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
       setIsPanning(false);
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      pendingPanPointerId.current = null;
     },
-    [],
+    [isPanning],
   );
 
   const resetView = useCallback(() => {
@@ -162,11 +207,28 @@ export function FamilyTreeView({
       x: canvas.width / 2 - centerX * scale,
       y: canvas.height / 2 - centerY * scale,
     });
-  }, [bounds.height, bounds.minX, bounds.minY, bounds.width, layoutNodes.length]);
+  }, [
+    bounds.height,
+    bounds.minX,
+    bounds.minY,
+    bounds.width,
+    layoutNodes.length,
+  ]);
 
-  const handleRootChange = useCallback((personId: string) => {
-    setRootPersonId(personId);
-  }, []);
+  const handleRootChange = useCallback(
+    (personId: string) => {
+      setRootPersonId(personId);
+
+      const params = new URLSearchParams();
+      params.set("root", personId);
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router],
+  );
+
+  useEffect(() => {
+    setRootPersonId(initialRootPersonId);
+  }, [initialRootPersonId]);
 
   useEffect(() => {
     if (layoutNodes.length === 0 || !canvasRef.current) {
@@ -194,18 +256,39 @@ export function FamilyTreeView({
     });
   }, [layoutNodes, rootPersonId]);
 
+  useEffect(() => {
+    if (layoutNodes.length === 0) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      resetView();
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isFullscreen, layoutNodes.length, resetView]);
+
   if (persons.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-muted-foreground">
-          Add family members before viewing the family tree.
-        </p>
+        <p className="text-muted-foreground">{t("tree.empty")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] min-h-[560px] flex-col overflow-hidden rounded-xl border">
+    <div
+      ref={containerRef}
+      className={cn(
+        "bg-card flex flex-col overflow-hidden rounded-xl border",
+        isFullscreen
+          ? "bg-background h-full w-full rounded-none border-0"
+          : "min-h-[680px] flex-1",
+        className,
+      )}
+    >
       <FamilyTreeToolbar
         persons={persons}
         rootPersonId={rootPersonId}
@@ -215,6 +298,10 @@ export function FamilyTreeView({
         hasMoreAncestors={data?.hasMoreAncestors ?? false}
         hasMoreDescendants={data?.hasMoreDescendants ?? false}
         scale={viewport.scale}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => {
+          void toggleFullscreen();
+        }}
         onSearchQueryChange={setSearchQuery}
         onRootPersonChange={handleRootChange}
         onAncestorDepthChange={setAncestorDepth}
@@ -222,13 +309,21 @@ export function FamilyTreeView({
         onZoomIn={() =>
           setViewport((current) => ({
             ...current,
-            scale: clamp(current.scale + SCALE_STEP, MIN_SCALE, MAX_SCALE),
+            scale: clamp(
+              current.scale + BUTTON_ZOOM_STEP,
+              MIN_SCALE,
+              MAX_SCALE,
+            ),
           }))
         }
         onZoomOut={() =>
           setViewport((current) => ({
             ...current,
-            scale: clamp(current.scale - SCALE_STEP, MIN_SCALE, MAX_SCALE),
+            scale: clamp(
+              current.scale - BUTTON_ZOOM_STEP,
+              MIN_SCALE,
+              MAX_SCALE,
+            ),
           }))
         }
         onResetView={resetView}
@@ -237,7 +332,8 @@ export function FamilyTreeView({
       <div
         ref={canvasRef}
         className={cn(
-          "bg-muted/20 relative flex-1 overflow-hidden",
+          "bg-muted/40 relative flex-1 overflow-hidden",
+          "bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:24px_24px]",
           isPanning ? "cursor-grabbing" : "cursor-grab",
         )}
         onWheel={handleWheel}
@@ -248,14 +344,14 @@ export function FamilyTreeView({
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">Loading family tree...</p>
+            <p className="text-muted-foreground text-sm">{t("tree.loading")}</p>
           </div>
         )}
 
         {isError && (
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-destructive text-sm">
-              {error instanceof Error ? error.message : "Failed to load tree"}
+              {error instanceof Error ? error.message : t("tree.loadFailed")}
             </p>
           </div>
         )}
@@ -268,7 +364,7 @@ export function FamilyTreeView({
             }}
           >
             <svg
-              className="pointer-events-none absolute overflow-visible"
+              className="pointer-events-none absolute z-0 overflow-visible"
               width={Math.max(bounds.width, TREE_NODE_WIDTH)}
               height={Math.max(bounds.height, TREE_NODE_HEIGHT)}
               style={{
@@ -276,42 +372,16 @@ export function FamilyTreeView({
                 top: bounds.minY,
               }}
             >
-              {visibleEdges.map((edge) => {
-                const source = layoutMap.get(edge.sourceId);
-                const target = layoutMap.get(edge.targetId);
-
-                if (!source || !target) {
-                  return null;
-                }
-
-                return (
-                  <path
-                    key={edge.id}
-                    d={getEdgePath(
-                      {
-                        ...source,
-                        x: source.x - bounds.minX,
-                        y: source.y - bounds.minY,
-                      },
-                      {
-                        ...target,
-                        x: target.x - bounds.minX,
-                        y: target.y - bounds.minY,
-                      },
-                      edge.type,
-                    )}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={edge.type === "spouse" ? 2 : 1.5}
-                    className={
-                      edge.type === "spouse"
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    }
-                    strokeDasharray={edge.type === "spouse" ? "0" : "0"}
-                  />
-                );
-              })}
+              {renderedEdges.map((edge) => (
+                <path
+                  key={edge.id}
+                  d={edge.d}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  className="text-muted-foreground"
+                />
+              ))}
             </svg>
 
             {layoutNodes.map((node) => (
@@ -326,9 +396,10 @@ export function FamilyTreeView({
         )}
 
         {!isLoading && data && layoutNodes.length === 1 && (
-          <div className="absolute right-4 bottom-4 rounded-md border bg-background/90 px-3 py-2 text-sm shadow-sm">
-            Showing {formatPersonName(layoutNodes[0].person)}. Add relationships
-            to grow the tree.
+          <div className="bg-background/90 absolute right-4 bottom-4 rounded-md border px-3 py-2 text-sm shadow-sm">
+            {t("tree.showingPerson", {
+              name: formatPersonName(layoutNodes[0].person),
+            })}
           </div>
         )}
       </div>
@@ -338,4 +409,19 @@ export function FamilyTreeView({
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function normalizeWheelDelta(
+  event: React.WheelEvent<HTMLDivElement>,
+  canvasHeight: number,
+): number {
+  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+    return event.deltaY * 16;
+  }
+
+  if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+    return event.deltaY * canvasHeight;
+  }
+
+  return event.deltaY;
 }

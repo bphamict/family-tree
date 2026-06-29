@@ -9,7 +9,7 @@ import {
   acceptInvitationAction,
   declineInvitationAction,
 } from "@/features/families/family-actions";
-import { ROLE_LABELS } from "@/lib/family/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Family, FamilyInvitation } from "@/types/family";
 
 type PendingInvitationsProps = {
@@ -17,6 +17,7 @@ type PendingInvitationsProps = {
 };
 
 export function PendingInvitations({ invitations }: PendingInvitationsProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleAccept(token: string) {
@@ -56,19 +57,21 @@ export function PendingInvitations({ invitations }: PendingInvitationsProps) {
           <div className="flex flex-col gap-1">
             <p className="font-medium">{invitation.family.name}</p>
             <p className="text-muted-foreground text-sm">
-              Invited as {ROLE_LABELS[invitation.role]}
+              {t("common.invitedAs", {
+                role: t(`family.roles.${invitation.role}`),
+              })}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">Pending</Badge>
+            <Badge variant="secondary">{t("common.pending")}</Badge>
             <Button
               type="button"
               size="sm"
               onClick={() => handleAccept(invitation.token)}
               disabled={isPending}
             >
-              Accept
+              {t("family.accept")}
             </Button>
             <Button
               type="button"
@@ -77,7 +80,7 @@ export function PendingInvitations({ invitations }: PendingInvitationsProps) {
               onClick={() => handleDecline(invitation.id)}
               disabled={isPending}
             >
-              Decline
+              {t("family.decline")}
             </Button>
           </div>
         </div>

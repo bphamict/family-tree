@@ -11,10 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DocumentDeleteButton } from "@/features/documents/document-delete-button";
-import {
-  DOCUMENT_TYPE_LABELS,
-  formatFileSize,
-} from "@/lib/document/constants";
+import { formatFileSize } from "@/lib/document/constants";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { Document } from "@/types/document";
 
 type LinkedDocumentsSectionProps = {
@@ -26,32 +24,38 @@ type LinkedDocumentsSectionProps = {
   uploadHref?: string;
 };
 
-export function LinkedDocumentsSection({
+export async function LinkedDocumentsSection({
   familyId,
   documents,
   canManage,
-  title = "Documents",
-  description = "Files linked to this record.",
+  title,
+  description,
   uploadHref,
 }: LinkedDocumentsSectionProps) {
+  const t = await getTranslations();
+  const sectionTitle = title ?? t("document.sectionTitle");
+  const sectionDescription = description ?? t("document.sectionDescription");
+
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardTitle>{sectionTitle}</CardTitle>
+            <CardDescription>{sectionDescription}</CardDescription>
           </div>
           {canManage && uploadHref && (
             <Button asChild size="sm" variant="outline">
-              <Link href={uploadHref}>Upload</Link>
+              <Link href={uploadHref}>{t("common.upload")}</Link>
             </Button>
           )}
         </div>
       </CardHeader>
       <CardContent>
         {documents.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No documents yet.</p>
+          <p className="text-muted-foreground text-sm">
+            {t("document.emptyLinked")}
+          </p>
         ) : (
           <div className="flex flex-col gap-3">
             {documents.map((document) => (
@@ -64,12 +68,12 @@ export function LinkedDocumentsSection({
                   <div className="min-w-0">
                     <p className="truncate font-medium">{document.title}</p>
                     <p className="text-muted-foreground text-sm">
-                      {DOCUMENT_TYPE_LABELS[document.document_type]} ·{" "}
+                      {t(`document.types.${document.document_type}`)} ·{" "}
                       {formatFileSize(document.file_size)}
                     </p>
                   </div>
                   <Badge variant="secondary" className="hidden sm:inline-flex">
-                    {DOCUMENT_TYPE_LABELS[document.document_type]}
+                    {t(`document.types.${document.document_type}`)}
                   </Badge>
                 </div>
                 <div className="flex gap-2">
@@ -79,7 +83,7 @@ export function LinkedDocumentsSection({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Open
+                      {t("common.open")}
                     </a>
                   </Button>
                   {canManage && (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +20,15 @@ import {
   getUserFamilies,
 } from "@/features/families/family-service";
 import { requireUser } from "@/lib/auth/require-user";
-import { ROLE_LABELS } from "@/lib/family/constants";
+import { getTranslations } from "@/lib/i18n/translator";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("common.dashboard") };
+}
 
 export default async function DashboardPage() {
+  const t = await getTranslations();
   const user = await requireUser();
   const [profile, families, activeFamily, pendingInvitations] =
     await Promise.all([
@@ -43,18 +46,24 @@ export default async function DashboardPage() {
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
         <section className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {t("common.dashboard")}
+          </h1>
           <p className="text-muted-foreground text-lg">
-            Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}.
+            {profile?.full_name
+              ? t("common.welcomeBackWithName", {
+                  name: `, ${profile.full_name}`,
+                })
+              : t("common.welcomeBack", { name: "" })}
           </p>
         </section>
 
         {pendingInvitations.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Pending invitations</CardTitle>
+              <CardTitle>{t("family.pendingInvitations")}</CardTitle>
               <CardDescription>
-                You have been invited to join the following families.
+                {t("family.pendingInvitationsDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -66,9 +75,9 @@ export default async function DashboardPage() {
         <section className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Active family</CardTitle>
+              <CardTitle>{t("family.activeFamily")}</CardTitle>
               <CardDescription>
-                The family you are currently working with.
+                {t("family.activeFamilyDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -77,25 +86,32 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{activeFamily.name}</p>
                     {activeFamily.archived_at && (
-                      <Badge variant="secondary">Archived</Badge>
+                      <Badge variant="secondary">{t("common.archived")}</Badge>
                     )}
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    Role: {ROLE_LABELS[activeFamily.membership.role]}
+                    {t("common.role", {
+                      role: t(`family.roles.${activeFamily.membership.role}`),
+                    })}
                   </p>
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/families/${activeFamily.id}`}>
-                      View family
+                      {t("common.viewFamily")}
                     </Link>
                   </Button>
                 </>
               ) : (
                 <div className="flex flex-col gap-3">
                   <p className="text-muted-foreground text-sm">
-                    You have not joined a family yet.
+                    {t("family.notJoinedFamily")}
                   </p>
-                  <Button asChild size="sm">
-                    <Link href="/families/new">Create a family</Link>
+                  <Button asChild size="icon">
+                    <Link
+                      href="/families/new"
+                      aria-label={t("family.createAFamily")}
+                    >
+                      <Plus className="size-4" />
+                    </Link>
                   </Button>
                 </div>
               )}
@@ -104,10 +120,9 @@ export default async function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Your families</CardTitle>
+              <CardTitle>{t("family.yourFamilies")}</CardTitle>
               <CardDescription>
-                {families.length} famil{families.length === 1 ? "y" : "ies"}{" "}
-                total
+                {t("common.familyCount", { count: families.length })}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -115,21 +130,24 @@ export default async function DashboardPage() {
                 <>
                   <ul className="space-y-2 text-sm">
                     {families.slice(0, 3).map((family) => (
-                      <li key={family.id} className="flex items-center justify-between">
+                      <li
+                        key={family.id}
+                        className="flex items-center justify-between"
+                      >
                         <span>{family.name}</span>
                         <Badge variant="outline">
-                          {ROLE_LABELS[family.membership.role]}
+                          {t(`family.roles.${family.membership.role}`)}
                         </Badge>
                       </li>
                     ))}
                   </ul>
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/families">View all families</Link>
+                    <Link href="/families">{t("common.viewAllFamilies")}</Link>
                   </Button>
                 </>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Create a family or accept an invitation to get started.
+                  {t("family.getStartedFamilies")}
                 </p>
               )}
             </CardContent>
@@ -137,19 +155,21 @@ export default async function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Your profile</CardTitle>
+              <CardTitle>{t("family.yourProfile")}</CardTitle>
               <CardDescription>
-                Account information from your user profile.
+                {t("family.yourProfileDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div>
-                <p className="text-muted-foreground">Email</p>
+                <p className="text-muted-foreground">{t("common.email")}</p>
                 <p className="font-medium">{user.email}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Full name</p>
-                <p className="font-medium">{profile?.full_name ?? "Not set"}</p>
+                <p className="text-muted-foreground">{t("common.fullName")}</p>
+                <p className="font-medium">
+                  {profile?.full_name ?? t("common.notSet")}
+                </p>
               </div>
             </CardContent>
           </Card>

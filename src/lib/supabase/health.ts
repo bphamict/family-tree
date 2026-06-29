@@ -1,4 +1,5 @@
 import { hasPublicEnv } from "@/lib/env";
+import { getTranslations } from "@/lib/i18n/translator";
 import { createClient } from "@/lib/supabase/server";
 
 export type SupabaseHealthStatus = {
@@ -8,11 +9,13 @@ export type SupabaseHealthStatus = {
 };
 
 export async function checkSupabaseHealth(): Promise<SupabaseHealthStatus> {
+  const t = await getTranslations();
+
   if (!hasPublicEnv()) {
     return {
       configured: false,
       connected: false,
-      message: "Supabase environment variables are not configured.",
+      message: t("common.supabaseNotConfigured"),
     };
   }
 
@@ -31,11 +34,13 @@ export async function checkSupabaseHealth(): Promise<SupabaseHealthStatus> {
     return {
       configured: true,
       connected: true,
-      message: "Connected to Supabase.",
+      message: t("common.supabaseConnected"),
     };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unknown connection error.";
+      error instanceof Error
+        ? error.message
+        : t("common.unknownConnectionError");
 
     return {
       configured: true,

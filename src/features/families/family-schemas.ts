@@ -2,27 +2,40 @@ import { z } from "zod";
 
 import { INVITABLE_ROLES } from "@/lib/family/constants";
 
-export const createFamilySchema = z.object({
-  name: z.string().min(2, "Family name must be at least 2 characters"),
-  description: z.string().max(1000, "Description is too long").optional(),
-});
+type FamilyValidationMessages = {
+  nameMin: string;
+  descriptionTooLong: string;
+  email: string;
+};
 
-export const updateFamilySchema = z.object({
-  name: z.string().min(2, "Family name must be at least 2 characters"),
-  description: z.string().max(1000, "Description is too long").optional(),
-});
+export function createFamilySchema(messages: FamilyValidationMessages) {
+  return z.object({
+    name: z.string().min(2, messages.nameMin),
+    description: z.string().max(1000, messages.descriptionTooLong).optional(),
+  });
+}
 
-export const inviteMemberSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  role: z.enum(INVITABLE_ROLES),
-});
+export function createUpdateFamilySchema(messages: FamilyValidationMessages) {
+  return createFamilySchema(messages);
+}
+
+export function createInviteMemberSchema(messages: FamilyValidationMessages) {
+  return z.object({
+    email: z.email(messages.email),
+    role: z.enum(INVITABLE_ROLES),
+  });
+}
 
 export const updateMemberRoleSchema = z.object({
   membershipId: z.uuid(),
   role: z.enum(INVITABLE_ROLES),
 });
 
-export type CreateFamilyInput = z.infer<typeof createFamilySchema>;
-export type UpdateFamilyInput = z.infer<typeof updateFamilySchema>;
-export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
+export type CreateFamilyInput = z.infer<ReturnType<typeof createFamilySchema>>;
+export type UpdateFamilyInput = z.infer<
+  ReturnType<typeof createUpdateFamilySchema>
+>;
+export type InviteMemberInput = z.infer<
+  ReturnType<typeof createInviteMemberSchema>
+>;
 export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;

@@ -1,9 +1,18 @@
 "use client";
 
 import { useTransition } from "react";
+import { Settings } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +21,7 @@ import {
   restoreFamilyAction,
   updateFamilyAction,
 } from "@/features/families/family-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { FamilyWithMembership } from "@/types/family";
 
 type EditFamilyFormProps = {
@@ -20,11 +30,47 @@ type EditFamilyFormProps = {
   canArchive: boolean;
 };
 
+export function FamilySettingsDialog({
+  family,
+  canManage,
+  canArchive,
+}: EditFamilyFormProps) {
+  const t = useTranslations();
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={t("family.familySettings")}
+        >
+          <Settings className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("family.familySettings")}</DialogTitle>
+          <DialogDescription>
+            {t("family.familySettingsDescription")}
+          </DialogDescription>
+        </DialogHeader>
+        <EditFamilyForm
+          family={family}
+          canManage={canManage}
+          canArchive={canArchive}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function EditFamilyForm({
   family,
   canManage,
   canArchive,
 }: EditFamilyFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const isArchived = Boolean(family.archived_at);
 
@@ -60,7 +106,7 @@ export function EditFamilyForm({
     <div className="flex flex-col gap-6">
       <form action={handleUpdate} className="flex flex-col gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="name">Family name</Label>
+          <Label htmlFor="name">{t("family.familyName")}</Label>
           <Input
             id="name"
             name="name"
@@ -71,7 +117,7 @@ export function EditFamilyForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t("common.description")}</Label>
           <Textarea
             id="description"
             name="description"
@@ -82,7 +128,7 @@ export function EditFamilyForm({
 
         {canManage && (
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving..." : "Save changes"}
+            {isPending ? t("common.saving") : t("common.save")}
           </Button>
         )}
       </form>
@@ -94,7 +140,7 @@ export function EditFamilyForm({
           onClick={handleArchive}
           disabled={isPending}
         >
-          {isArchived ? "Restore family" : "Archive family"}
+          {isArchived ? t("family.restoreFamily") : t("family.archiveFamily")}
         </Button>
       )}
     </div>

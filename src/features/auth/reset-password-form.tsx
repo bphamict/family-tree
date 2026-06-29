@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -18,19 +18,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  resetPasswordSchema,
+  createResetPasswordSchema,
   type ResetPasswordInput,
 } from "@/features/auth/auth-schemas";
 import { updatePassword } from "@/features/auth/auth-service";
+import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function ResetPasswordForm() {
+  const t = useTranslations();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
 
+  const validationMessages = useMemo(() => getAuthValidationMessages(t), [t]);
+  const schema = useMemo(
+    () => createResetPasswordSchema(validationMessages),
+    [validationMessages],
+  );
+
   const form = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -61,7 +70,7 @@ export function ResetPasswordForm() {
       return;
     }
 
-    toast.success("Password updated successfully");
+    toast.success(t("auth.passwordUpdated"));
     router.push("/dashboard");
     router.refresh();
   }
@@ -69,7 +78,7 @@ export function ResetPasswordForm() {
   if (hasSession === null) {
     return (
       <p className="text-muted-foreground text-center text-sm">
-        Verifying reset link...
+        {t("auth.verifyingReset")}
       </p>
     );
   }
@@ -78,14 +87,13 @@ export function ResetPasswordForm() {
     return (
       <div className="flex flex-col gap-4 text-center">
         <p className="text-muted-foreground text-sm">
-          This reset link is invalid or has expired. Request a new one to
-          continue.
+          {t("auth.invalidResetLink")}
         </p>
         <Link
           href="/forgot-password"
           className="text-foreground text-sm font-medium hover:underline"
         >
-          Request new reset link
+          {t("auth.requestNewReset")}
         </Link>
       </div>
     );
@@ -93,19 +101,18 @@ export function ResetPasswordForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New password</FormLabel>
+              <FormLabel>{t("auth.newPassword")}</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -117,13 +124,9 @@ export function ResetPasswordForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm new password</FormLabel>
+              <FormLabel>{t("auth.confirmNewPassword")}</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -131,7 +134,7 @@ export function ResetPasswordForm() {
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Updating..." : "Update password"}
+          {isSubmitting ? t("auth.updating") : t("auth.updatePassword")}
         </Button>
       </form>
     </Form>

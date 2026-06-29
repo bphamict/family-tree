@@ -7,6 +7,7 @@ export type TreePerson = Pick<
   | "first_name"
   | "middle_name"
   | "last_name"
+  | "other_name"
   | "birth_date"
   | "death_date"
   | "avatar_url"
@@ -20,6 +21,7 @@ export type TreeEdge = {
   sourceId: string;
   targetId: string;
   type: TreeEdgeType;
+  birthOrder: number | null;
 };
 
 export type TreeSubgraph = {
@@ -48,8 +50,9 @@ export const DEFAULT_ANCESTOR_DEPTH = 2;
 export const DEFAULT_DESCENDANT_DEPTH = 2;
 export const MAX_TREE_DEPTH = 6;
 
-export const TREE_NODE_WIDTH = 168;
-export const TREE_NODE_HEIGHT = 108;
+export const TREE_NODE_WIDTH = 120;
+export const TREE_NODE_HEIGHT = 168;
 export const TREE_HORIZONTAL_GAP = 48;
-export const TREE_VERTICAL_GAP = 120;
+export const TREE_GENERATION_GAP = 48;
+export const TREE_VERTICAL_GAP = TREE_NODE_HEIGHT + TREE_GENERATION_GAP;
 export const TREE_SPOUSE_GAP = 24;

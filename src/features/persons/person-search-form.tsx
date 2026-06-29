@@ -1,7 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GENDER_LABELS, PERSON_GENDERS } from "@/lib/person/constants";
+import { PERSON_GENDERS } from "@/lib/person/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { PersonSearchFilters } from "@/types/person";
 
 type PersonSearchFormProps = {
@@ -9,61 +12,67 @@ type PersonSearchFormProps = {
 };
 
 export function PersonSearchForm({ filters }: PersonSearchFormProps) {
+  const t = useTranslations();
+  const currentYear = new Date().getFullYear();
+
   return (
-    <form method="get" className="grid gap-4 rounded-lg border p-4 md:grid-cols-2 lg:grid-cols-3">
+    <form
+      method="get"
+      className="grid gap-4 rounded-lg border p-4 md:grid-cols-2 lg:grid-cols-3"
+    >
       <div className="grid gap-2 lg:col-span-2">
-        <Label htmlFor="query">Search by name</Label>
+        <Label htmlFor="query">{t("person.searchByName")}</Label>
         <Input
           id="query"
           name="query"
-          placeholder="First, middle, or last name"
+          placeholder={t("person.namePlaceholder")}
           defaultValue={filters.query ?? ""}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="gender">Gender</Label>
+        <Label htmlFor="gender">{t("person.gender")}</Label>
         <select
           id="gender"
           name="gender"
           defaultValue={filters.gender ?? ""}
           className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs"
         >
-          <option value="">All genders</option>
+          <option value="">{t("common.allGenders")}</option>
           {PERSON_GENDERS.map((gender) => (
             <option key={gender} value={gender}>
-              {GENDER_LABELS[gender]}
+              {t(`person.genderLabels.${gender}`)}
             </option>
           ))}
         </select>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="birthYear">Birth year</Label>
+        <Label htmlFor="birthYear">{t("person.birthYear")}</Label>
         <Input
           id="birthYear"
           name="birthYear"
-          placeholder="e.g. 1950"
+          placeholder={t("person.yearPlaceholder", { year: 1950 })}
           defaultValue={filters.birthYear ?? ""}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="deathYear">Death year</Label>
+        <Label htmlFor="deathYear">{t("person.deathYear")}</Label>
         <Input
           id="deathYear"
           name="deathYear"
-          placeholder="e.g. 2020"
+          placeholder={t("person.yearPlaceholder", { year: currentYear })}
           defaultValue={filters.deathYear ?? ""}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="occupation">Occupation</Label>
+        <Label htmlFor="occupation">{t("person.occupation")}</Label>
         <Input
           id="occupation"
           name="occupation"
-          placeholder="e.g. Teacher"
+          placeholder={t("person.occupationPlaceholder")}
           defaultValue={filters.occupation ?? ""}
         />
       </div>
@@ -77,14 +86,14 @@ export function PersonSearchForm({ filters }: PersonSearchFormProps) {
             defaultChecked={filters.includeArchived}
             className="size-4 rounded border"
           />
-          Include archived
+          {t("common.includeArchived")}
         </label>
       </div>
 
       <div className="flex items-end gap-2 md:col-span-2 lg:col-span-3">
-        <Button type="submit">Search</Button>
+        <Button type="submit">{t("common.search")}</Button>
         <Button type="button" variant="outline" asChild>
-          <a href="?">Clear</a>
+          <a href="?">{t("common.clear")}</a>
         </Button>
       </div>
     </form>

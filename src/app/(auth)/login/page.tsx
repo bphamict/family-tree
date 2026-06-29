@@ -9,23 +9,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LoginForm } from "@/features/auth/login-form";
+import { getTranslations } from "@/lib/i18n/translator";
 
-export const metadata: Metadata = {
-  title: "Sign in",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("auth.signInTitle") };
+}
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>
-          Enter your email and password to access your account.
-        </CardDescription>
+        <CardTitle>{t("auth.signInTitle")}</CardTitle>
+        <CardDescription>{t("auth.signInDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense
-          fallback={<p className="text-muted-foreground text-sm">Loading...</p>}
+          fallback={
+            <p className="text-muted-foreground text-sm">
+              {t("common.loading")}
+            </p>
+          }
         >
           <LoginForm />
         </Suspense>

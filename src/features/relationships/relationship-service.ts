@@ -9,7 +9,7 @@ import type {
 } from "@/types/relationship";
 
 const RELATIONSHIP_SELECT =
-  "id, person1_id, person2_id, relationship_type, start_date, end_date, created_at, updated_at";
+  "id, person1_id, person2_id, relationship_type, start_date, end_date, birth_order, created_at, updated_at";
 
 const PERSON_SELECT =
   "id, first_name, middle_name, last_name, gender, birth_date, death_date, avatar_url, archived_at";
@@ -21,6 +21,7 @@ function mapRelationship(row: {
   relationship_type: string;
   start_date: string | null;
   end_date: string | null;
+  birth_order: number | null;
   created_at: string;
   updated_at: string;
 }): Relationship {
@@ -71,7 +72,7 @@ export async function getPersonOptionsForRelationships(
   const { data, error } = await supabase
     .from("persons")
     .select(
-      "id, family_id, branch_id, first_name, middle_name, last_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at",
+      "id, family_id, branch_id, first_name, middle_name, last_name, other_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at",
     )
     .eq("family_id", familyId)
     .neq("id", excludePersonId)

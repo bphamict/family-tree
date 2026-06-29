@@ -16,15 +16,17 @@ import { getEventsByFamily } from "@/features/events/event-service";
 import { getFamilyById } from "@/features/families/family-service";
 import { getPersonsByFamily } from "@/features/persons/person-service";
 import { canManageDocuments } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 
 type NewDocumentPageProps = {
   params: Promise<{ familyId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const metadata: Metadata = {
-  title: "Upload document",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("document.uploadTitle") };
+}
 
 function getSearchParam(
   searchParams: Record<string, string | string[] | undefined>,
@@ -38,6 +40,7 @@ export default async function NewDocumentPage({
   params,
   searchParams,
 }: NewDocumentPageProps) {
+  const t = await getTranslations();
   const { familyId } = await params;
   const resolvedSearchParams = await searchParams;
   const family = await getFamilyById(familyId);
@@ -54,12 +57,11 @@ export default async function NewDocumentPage({
     getEventsByFamily(familyId),
   ]);
 
-  const redirectTo =
-    defaultPersonId
-      ? `/families/${familyId}/persons/${defaultPersonId}`
-      : defaultEventId
-        ? `/families/${familyId}/events/${defaultEventId}/edit`
-        : `/families/${familyId}/documents`;
+  const redirectTo = defaultPersonId
+    ? `/families/${familyId}/persons/${defaultPersonId}`
+    : defaultEventId
+      ? `/families/${familyId}/events/${defaultEventId}/edit`
+      : `/families/${familyId}/documents`;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -69,23 +71,24 @@ export default async function NewDocumentPage({
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
-              Upload document
+              {t("document.uploadHeading")}
             </h1>
             <p className="text-muted-foreground">
-              Add photos, PDFs, or videos to {family.name}.
+              {t("document.uploadDescription", { familyName: family.name })}
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link href={`/families/${familyId}/documents`}>Cancel</Link>
+            <Link href={`/families/${familyId}/documents`}>
+              {t("common.cancel")}
+            </Link>
           </Button>
         </section>
 
         <Card>
           <CardHeader>
-            <CardTitle>Document details</CardTitle>
+            <CardTitle>{t("document.uploadFormTitle")}</CardTitle>
             <CardDescription>
-              Files are stored securely and can be linked to family members or
-              events.
+              {t("document.uploadFormDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>

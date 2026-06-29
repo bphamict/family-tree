@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { uploadDocumentSchema } from "@/features/documents/document-schemas";
+import { createUploadDocumentSchema } from "@/features/documents/document-schemas";
 import { getDocumentById } from "@/features/documents/document-service";
 import { getEventById } from "@/features/events/event-service";
 import { getFamilyById } from "@/features/families/family-service";
@@ -15,6 +15,8 @@ import {
   inferDocumentType,
 } from "@/lib/document/constants";
 import { canManageDocuments } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
+import { getDocumentValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/server";
 
 type ActionResult = {
@@ -40,13 +42,17 @@ function sanitizeFileName(fileName: string): string {
 
 async function requireDocumentManagement(familyId: string): Promise<
   | { error: string }
-  | { family: NonNullable<Awaited<ReturnType<typeof getFamilyById>>>; user: Awaited<ReturnType<typeof requireUser>> }
+  | {
+      family: NonNullable<Awaited<ReturnType<typeof getFamilyById>>>;
+      user: Awaited<ReturnType<typeof requireUser>>;
+    }
 > {
+  const t = await getTranslations();
   const user = await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManageDocuments(family.membership.role)) {
-    return { error: "You do not have permission to manage documents." };
+    return { error: t("document.errors.manage") };
   }
 
   return { family, user };
@@ -57,11 +63,13 @@ async function validateDocumentLinks(
   personId?: string,
   eventId?: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+
   if (personId) {
     const person = await getPersonById(familyId, personId);
 
     if (!person) {
-      return { error: "Selected person was not found in this family." };
+      return { error: t("event.errors.personNotFound") };
     }
   }
 
@@ -69,7 +77,7 @@ async function validateDocumentLinks(
     const event = await getEventById(familyId, eventId);
 
     if (!event) {
-      return { error: "Selected event was not found in this family." };
+      return { error: t("event.errors.eventNotFound") };
     }
   }
 
@@ -109,6 +117,8 @@ export async function uploadDocumentAction(
     redirectTo?: string;
   } = {},
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getDocumentValidationMessages(t);
   const permission = await requireDocumentManagement(familyId);
 
   if ("error" in permission) {
@@ -121,10 +131,10 @@ export async function uploadDocumentAction(
   const metadata = parseDocumentFormData(formData);
 
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Please select a file to upload." };
+    return { error: t("document.errors.selectFile") };
   }
 
-  const parsed = uploadDocumentSchema.safeParse({
+  const parsed = createUploadDocumentSchema(validationMessages).safeParse({
     ...metadata,
     mimeType: file.type,
     fileSize: file.size,
@@ -135,7 +145,9 @@ export async function uploadDocumentAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const linkValidation = await validateDocumentLinks(
@@ -197,13 +209,14 @@ export async function uploadDocumentAction(
     redirect(options.redirectTo);
   }
 
-  return { success: "Document uploaded successfully." };
+  return { success: t("document.toast.uploaded") };
 }
 
 export async function deleteDocumentAction(
   familyId: string,
   documentId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   const permission = await requireDocumentManagement(familyId);
 
   if ("error" in permission) {
@@ -213,7 +226,7 @@ export async function deleteDocumentAction(
   const document = await getDocumentById(familyId, documentId);
 
   if (!document) {
-    return { error: "Document not found." };
+    return { error: t("document.errors.notFound") };
   }
 
   const supabase = await createClient();
@@ -241,5 +254,5 @@ export async function deleteDocumentAction(
     eventId: document.event_id,
   });
 
-  return { success: "Document deleted successfully." };
+  return { success: t("document.toast.deleted") };
 }

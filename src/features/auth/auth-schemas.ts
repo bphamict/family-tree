@@ -1,37 +1,59 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
+type AuthValidationMessages = {
+  email: string;
+  passwordMin: string;
+  nameMin: string;
+  confirmPassword: string;
+  passwordsMismatch: string;
+};
 
-export const registerSchema = z
-  .object({
-    fullName: z.string().min(2, "Full name must be at least 2 characters"),
-    email: z.email("Enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+export function createLoginSchema(messages: AuthValidationMessages) {
+  return z.object({
+    email: z.email(messages.email),
+    password: z.string().min(8, messages.passwordMin),
   });
+}
 
-export const forgotPasswordSchema = z.object({
-  email: z.email("Enter a valid email address"),
-});
+export function createRegisterSchema(messages: AuthValidationMessages) {
+  return z
+    .object({
+      fullName: z.string().min(2, messages.nameMin),
+      email: z.email(messages.email),
+      password: z.string().min(8, messages.passwordMin),
+      confirmPassword: z.string().min(8, messages.confirmPassword),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: messages.passwordsMismatch,
+      path: ["confirmPassword"],
+    });
+}
 
-export const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+export function createForgotPasswordSchema(
+  messages: Pick<AuthValidationMessages, "email">,
+) {
+  return z.object({
+    email: z.email(messages.email),
   });
+}
 
-export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export function createResetPasswordSchema(messages: AuthValidationMessages) {
+  return z
+    .object({
+      password: z.string().min(8, messages.passwordMin),
+      confirmPassword: z.string().min(8, messages.confirmPassword),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: messages.passwordsMismatch,
+      path: ["confirmPassword"],
+    });
+}
+
+export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
+export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;
+export type ForgotPasswordInput = z.infer<
+  ReturnType<typeof createForgotPasswordSchema>
+>;
+export type ResetPasswordInput = z.infer<
+  ReturnType<typeof createResetPasswordSchema>
+>;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArrowLeft, Upload } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,8 @@ import { getDocumentsByFamily } from "@/features/documents/document-service";
 import { getEventsByFamily } from "@/features/events/event-service";
 import { getFamilyById } from "@/features/families/family-service";
 import { getPersonsByFamily } from "@/features/persons/person-service";
-import {
-  canManageDocuments,
-  canViewDocuments,
-} from "@/lib/family/permissions";
+import { canManageDocuments, canViewDocuments } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { DocumentSearchFilters, DocumentType } from "@/types/document";
 
 type DocumentsPageProps = {
@@ -22,9 +21,10 @@ type DocumentsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const metadata: Metadata = {
-  title: "Family archive",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("document.archiveTitle") };
+}
 
 function parseSearchFilters(
   searchParams: Record<string, string | string[] | undefined>,
@@ -37,9 +37,7 @@ function parseSearchFilters(
   const documentType = getValue("documentType");
 
   return {
-    documentType: documentType
-      ? (documentType as DocumentType)
-      : undefined,
+    documentType: documentType ? (documentType as DocumentType) : undefined,
     personId: getValue("personId"),
     eventId: getValue("eventId"),
   };
@@ -49,6 +47,7 @@ export default async function DocumentsPage({
   params,
   searchParams,
 }: DocumentsPageProps) {
+  const t = await getTranslations();
   const { familyId } = await params;
   const resolvedSearchParams = await searchParams;
   const family = await getFamilyById(familyId);
@@ -74,23 +73,31 @@ export default async function DocumentsPage({
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
-              {family.name} archive
+              {t("document.archiveHeading", { familyName: family.name })}
             </h1>
             <p className="text-muted-foreground">
-              {documents.length} document{documents.length === 1 ? "" : "s"}
+              {t("common.documentCount", { count: documents.length })}
             </p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link href={`/families/${familyId}`}>Back to family</Link>
-            </Button>
             {canManage && (
-              <Button asChild>
-                <Link href={`/families/${familyId}/documents/new`}>
-                  Upload document
+              <Button asChild size="icon">
+                <Link
+                  href={`/families/${familyId}/documents/new`}
+                  aria-label={t("family.uploadDocument")}
+                >
+                  <Upload className="size-4" />
                 </Link>
               </Button>
             )}
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}`}
+                aria-label={t("common.backToFamily")}
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
+            </Button>
           </div>
         </section>
 

@@ -97,7 +97,9 @@ export async function getActiveFamily(
   const activeFamilyId = await getActiveFamilyIdFromCookie();
 
   if (activeFamilyId) {
-    const activeFamily = families.find((family) => family.id === activeFamilyId);
+    const activeFamily = families.find(
+      (family) => family.id === activeFamilyId,
+    );
     if (activeFamily) {
       return activeFamily;
     }

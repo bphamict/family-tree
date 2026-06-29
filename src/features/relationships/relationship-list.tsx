@@ -1,19 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { PersonAvatar } from "@/components/shared/person-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { deleteRelationshipAction } from "@/features/relationships/relationship-actions";
-import { RELATIONSHIP_GROUP_LABELS } from "@/lib/relationship/constants";
+import {
+  deleteRelationshipAction,
+  reorderChildBirthOrderAction,
+} from "@/features/relationships/relationship-actions";
+import { formatDisplayDate } from "@/lib/date/format";
+import type { Translator } from "@/lib/i18n/translator";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import { formatPersonName } from "@/types/person";
 import type {
   PersonRelationshipGroups,
   PersonRelationshipView,
 } from "@/types/relationship";
+
+const GROUP_KEYS = [
+  "parents",
+  "spouses",
+  "children",
+  "guardians",
+  "wards",
+] as const;
+
+type RelationshipGroupKey = (typeof GROUP_KEYS)[number];
 
 type RelationshipListProps = {
   familyId: string;
@@ -28,22 +44,21 @@ export function RelationshipList({
   groups,
   canManage,
 }: RelationshipListProps) {
+  const t = useTranslations();
+
   const entries: Array<{
+    groupKey: RelationshipGroupKey;
     title: string;
     items: PersonRelationshipView[];
-  }> = [
-    { title: RELATIONSHIP_GROUP_LABELS.parents, items: groups.parents },
-    { title: RELATIONSHIP_GROUP_LABELS.spouses, items: groups.spouses },
-    { title: RELATIONSHIP_GROUP_LABELS.children, items: groups.children },
-    { title: RELATIONSHIP_GROUP_LABELS.guardians, items: groups.guardians },
-    { title: RELATIONSHIP_GROUP_LABELS.wards, items: groups.wards },
-  ].filter((entry) => entry.items.length > 0);
+  }> = GROUP_KEYS.map((groupKey) => ({
+    groupKey,
+    title: t(`relationship.groups.${groupKey}`),
+    items: groups[groupKey],
+  })).filter((entry) => entry.items.length > 0);
 
   if (entries.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        No relationships recorded yet.
-      </p>
+      <p className="text-muted-foreground text-sm">{t("relationship.empty")}</p>
     );
   }
 
@@ -51,7 +66,8 @@ export function RelationshipList({
     <div className="flex flex-col gap-6">
       {entries.map((entry) => (
         <RelationshipGroup
-          key={entry.title}
+          key={entry.groupKey}
+          groupKey={entry.groupKey}
           title={entry.title}
           familyId={familyId}
           personId={personId}
@@ -64,6 +80,7 @@ export function RelationshipList({
 }
 
 type RelationshipGroupProps = {
+  groupKey: RelationshipGroupKey;
   title: string;
   familyId: string;
   personId: string;
@@ -72,23 +89,30 @@ type RelationshipGroupProps = {
 };
 
 function RelationshipGroup({
+  groupKey,
   title,
   familyId,
   personId,
   items,
   canManage,
 }: RelationshipGroupProps) {
+  const supportsBirthOrder =
+    canManage && (groupKey === "children" || groupKey === "wards");
+
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-sm font-medium">{title}</h3>
       <div className="divide-y rounded-lg border">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <RelationshipRow
             key={item.relationship.id}
             familyId={familyId}
             personId={personId}
             item={item}
             canManage={canManage}
+            canReorder={supportsBirthOrder}
+            canMoveUp={supportsBirthOrder && index > 0}
+            canMoveDown={supportsBirthOrder && index < items.length - 1}
           />
         ))}
       </div>
@@ -101,6 +125,9 @@ type RelationshipRowProps = {
   personId: string;
   item: PersonRelationshipView;
   canManage: boolean;
+  canReorder: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 };
 
 function RelationshipRow({
@@ -108,10 +135,18 @@ function RelationshipRow({
   personId,
   item,
   canManage,
+  canReorder,
+  canMoveUp,
+  canMoveDown,
 }: RelationshipRowProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
-  const { relationship, relatedPerson, displayLabel } = item;
-  const dateRange = formatDateRange(relationship.start_date, relationship.end_date);
+  const { relationship, relatedPerson, displayLabelKey } = item;
+  const dateRange = formatDateRange(
+    t,
+    relationship.start_date,
+    relationship.end_date,
+  );
 
   function handleDelete() {
     startTransition(async () => {
@@ -119,6 +154,24 @@ function RelationshipRow({
         familyId,
         personId,
         relationship.id,
+      );
+
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(result.success);
+    });
+  }
+
+  function handleReorder(direction: "up" | "down") {
+    startTransition(async () => {
+      const result = await reorderChildBirthOrderAction(
+        familyId,
+        personId,
+        relationship.id,
+        direction,
       );
 
       if (result.error) {
@@ -142,9 +195,14 @@ function RelationshipRow({
             >
               {formatPersonName(relatedPerson)}
             </Link>
-            <Badge variant="outline">{displayLabel}</Badge>
+            <Badge variant="outline">{t(displayLabelKey)}</Badge>
+            {canReorder && relationship.birth_order !== null && (
+              <Badge variant="secondary">
+                {t("relationship.birthOrder")} {relationship.birth_order}
+              </Badge>
+            )}
             {relatedPerson.archived_at && (
-              <Badge variant="secondary">Archived</Badge>
+              <Badge variant="secondary">{t("common.archived")}</Badge>
             )}
           </div>
           {dateRange && (
@@ -154,21 +212,49 @@ function RelationshipRow({
       </div>
 
       {canManage && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleDelete}
-          disabled={isPending}
-        >
-          {isPending ? "Removing..." : "Remove"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {canReorder && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => handleReorder("up")}
+                disabled={isPending || !canMoveUp}
+                aria-label={t("relationship.moveUp")}
+              >
+                <ArrowUp className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => handleReorder("down")}
+                disabled={isPending || !canMoveDown}
+                aria-label={t("relationship.moveDown")}
+              >
+                <ArrowDown className="size-4" />
+              </Button>
+            </>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handleDelete}
+            disabled={isPending}
+            aria-label={t("common.remove")}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
       )}
     </div>
   );
 }
 
 function formatDateRange(
+  t: Translator,
   startDate: string | null,
   endDate: string | null,
 ): string | null {
@@ -177,12 +263,19 @@ function formatDateRange(
   }
 
   if (startDate && endDate) {
-    return `${startDate} to ${endDate}`;
+    return t("common.dateRange", {
+      start: formatDisplayDate(startDate) ?? startDate,
+      end: formatDisplayDate(endDate) ?? endDate,
+    });
   }
 
   if (startDate) {
-    return `From ${startDate}`;
+    return t("common.fromDate", {
+      date: formatDisplayDate(startDate) ?? startDate,
+    });
   }
 
-  return `Until ${endDate}`;
+  return t("common.untilDate", {
+    date: formatDisplayDate(endDate) ?? endDate!,
+  });
 }

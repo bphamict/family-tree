@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { TreePine } from "lucide-react";
+import { Network } from "lucide-react";
+
+import { ThemeSwitcher } from "@/components/shared/theme-switcher";
 
 export default function AuthLayout({
   children,
@@ -9,11 +11,12 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b">
-        <div className="mx-auto flex w-full max-w-5xl items-center px-6 py-4">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
-            <TreePine className="size-5" aria-hidden="true" />
+            <Network className="size-5" aria-hidden="true" />
             <span className="font-semibold">Family Tree</span>
           </Link>
+          <ThemeSwitcher />
         </div>
       </header>
 

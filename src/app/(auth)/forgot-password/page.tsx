@@ -8,19 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ForgotPasswordForm } from "@/features/auth/forgot-password-form";
+import { getTranslations } from "@/lib/i18n/translator";
 
-export const metadata: Metadata = {
-  title: "Forgot password",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("auth.forgotTitle") };
+}
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const t = await getTranslations();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Forgot password</CardTitle>
-        <CardDescription>
-          Enter your email and we&apos;ll send you a reset link.
-        </CardDescription>
+        <CardTitle>{t("auth.forgotTitle")}</CardTitle>
+        <CardDescription>{t("auth.forgotDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ForgotPasswordForm />

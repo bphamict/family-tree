@@ -16,9 +16,9 @@ import {
 import { createRelationshipAction } from "@/features/relationships/relationship-actions";
 import {
   CREATE_RELATIONSHIP_TYPES,
-  RELATIONSHIP_TYPE_LABELS,
   type CreateRelationshipType,
 } from "@/lib/relationship/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import { formatPersonName, type Person } from "@/types/person";
 
 type AddRelationshipFormProps = {
@@ -32,6 +32,7 @@ export function AddRelationshipForm({
   personId,
   personOptions,
 }: AddRelationshipFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [relationshipType, setRelationshipType] =
     useState<CreateRelationshipType>("parent");
@@ -61,7 +62,7 @@ export function AddRelationshipForm({
   if (personOptions.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Add more people to this family before creating relationships.
+        {t("relationship.needMorePeople")}
       </p>
     );
   }
@@ -70,7 +71,7 @@ export function AddRelationshipForm({
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="relationshipType">Relationship type</Label>
+          <Label htmlFor="relationshipType">{t("relationship.type")}</Label>
           <Select
             value={relationshipType}
             onValueChange={(value) =>
@@ -84,7 +85,7 @@ export function AddRelationshipForm({
             <SelectContent>
               {CREATE_RELATIONSHIP_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {RELATIONSHIP_TYPE_LABELS[type]}
+                  {t(`relationship.types.${type}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -92,14 +93,16 @@ export function AddRelationshipForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="relatedPersonId">Related person</Label>
+          <Label htmlFor="relatedPersonId">
+            {t("relationship.relatedPerson")}
+          </Label>
           <Select
             value={relatedPersonId}
             onValueChange={setRelatedPersonId}
             disabled={isPending}
           >
             <SelectTrigger id="relatedPersonId">
-              <SelectValue placeholder="Select a person" />
+              <SelectValue placeholder={t("relationship.selectPerson")} />
             </SelectTrigger>
             <SelectContent>
               {personOptions.map((person) => (
@@ -114,18 +117,25 @@ export function AddRelationshipForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="startDate">Start date (optional)</Label>
-          <Input id="startDate" name="startDate" type="date" disabled={isPending} />
+          <Label htmlFor="startDate">{t("relationship.startDate")}</Label>
+          <Input
+            id="startDate"
+            name="startDate"
+            type="date"
+            disabled={isPending}
+          />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="endDate">End date (optional)</Label>
+          <Label htmlFor="endDate">{t("relationship.endDate")}</Label>
           <Input id="endDate" name="endDate" type="date" disabled={isPending} />
         </div>
       </div>
 
       <Button type="submit" disabled={isPending || !relatedPersonId}>
-        {isPending ? "Adding..." : "Add relationship"}
+        {isPending
+          ? t("relationship.adding")
+          : t("relationship.addRelationship")}
       </Button>
     </form>
   );

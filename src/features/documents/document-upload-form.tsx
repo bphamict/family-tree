@@ -16,6 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { uploadDocumentAction } from "@/features/documents/document-actions";
 import { DOCUMENT_ACCEPT_TYPES } from "@/lib/document/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Event } from "@/types/event";
 import { formatPersonName, type Person } from "@/types/person";
 
@@ -36,6 +37,7 @@ export function DocumentUploadForm({
   defaultEventId,
   redirectTo,
 }: DocumentUploadFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [personId, setPersonId] = useState(defaultPersonId ?? "");
   const [eventId, setEventId] = useState(defaultEventId ?? "");
@@ -68,17 +70,17 @@ export function DocumentUploadForm({
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title">{t("common.title")}</Label>
         <Input
           id="title"
           name="title"
-          placeholder="Optional — defaults to file name"
+          placeholder={t("document.titlePlaceholder")}
           disabled={isPending}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="file">File</Label>
+        <Label htmlFor="file">{t("document.file")}</Label>
         <Input
           id="file"
           name="file"
@@ -88,12 +90,12 @@ export function DocumentUploadForm({
           disabled={isPending}
         />
         <p className="text-muted-foreground text-xs">
-          Images, PDFs, and videos up to 50 MB.
+          {t("document.fileHint")}
         </p>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("common.description")}</Label>
         <Textarea
           id="description"
           name="description"
@@ -104,7 +106,7 @@ export function DocumentUploadForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="personId">Link to person</Label>
+          <Label htmlFor="personId">{t("document.linkPerson")}</Label>
           <Select
             value={personId || "none"}
             onValueChange={(value) =>
@@ -113,10 +115,10 @@ export function DocumentUploadForm({
             disabled={isPending || Boolean(defaultPersonId)}
           >
             <SelectTrigger id="personId">
-              <SelectValue placeholder="No person" />
+              <SelectValue placeholder={t("common.noPerson")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">No person</SelectItem>
+              <SelectItem value="none">{t("common.noPerson")}</SelectItem>
               {persons.map((person) => (
                 <SelectItem key={person.id} value={person.id}>
                   {formatPersonName(person)}
@@ -127,17 +129,17 @@ export function DocumentUploadForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="eventId">Link to event</Label>
+          <Label htmlFor="eventId">{t("document.linkEvent")}</Label>
           <Select
             value={eventId || "none"}
             onValueChange={(value) => setEventId(value === "none" ? "" : value)}
             disabled={isPending || Boolean(defaultEventId)}
           >
             <SelectTrigger id="eventId">
-              <SelectValue placeholder="No event" />
+              <SelectValue placeholder={t("common.noEvent")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">No event</SelectItem>
+              <SelectItem value="none">{t("common.noEvent")}</SelectItem>
               {events.map((event) => (
                 <SelectItem key={event.id} value={event.id}>
                   {event.title}
@@ -149,7 +151,7 @@ export function DocumentUploadForm({
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Uploading..." : "Upload document"}
+        {isPending ? t("common.uploading") : t("document.uploadDocument")}
       </Button>
     </form>
   );

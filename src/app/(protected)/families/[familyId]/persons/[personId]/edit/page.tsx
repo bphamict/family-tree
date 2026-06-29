@@ -16,6 +16,7 @@ import { AvatarUploadForm } from "@/features/persons/avatar-upload-form";
 import { PersonForm } from "@/features/persons/person-form";
 import { getPersonById } from "@/features/persons/person-service";
 import { canManagePersons } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 import { formatPersonName } from "@/types/person";
 
 type EditPersonPageProps = {
@@ -25,15 +26,19 @@ type EditPersonPageProps = {
 export async function generateMetadata({
   params,
 }: EditPersonPageProps): Promise<Metadata> {
+  const t = await getTranslations();
   const { familyId, personId } = await params;
   const person = await getPersonById(familyId, personId);
 
   return {
-    title: person ? `Edit ${formatPersonName(person)}` : "Edit person",
+    title: person
+      ? t("person.editHeading", { name: formatPersonName(person) })
+      : t("person.editTitle"),
   };
 }
 
 export default async function EditPersonPage({ params }: EditPersonPageProps) {
+  const t = await getTranslations();
   const { familyId, personId } = await params;
   const family = await getFamilyById(familyId);
 
@@ -55,23 +60,23 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
-              Edit {formatPersonName(person)}
+              {t("person.editHeading", { name: formatPersonName(person) })}
             </h1>
             <p className="text-muted-foreground">
-              Update genealogy information for this person.
+              {t("person.editDescription")}
             </p>
           </div>
           <Button asChild variant="outline">
             <Link href={`/families/${familyId}/persons/${personId}`}>
-              Cancel
+              {t("common.cancel")}
             </Link>
           </Button>
         </section>
 
         <Card>
           <CardHeader>
-            <CardTitle>Avatar</CardTitle>
-            <CardDescription>Upload a photo for this person.</CardDescription>
+            <CardTitle>{t("person.avatarTitle")}</CardTitle>
+            <CardDescription>{t("person.avatarDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <AvatarUploadForm familyId={familyId} person={person} />
@@ -80,10 +85,8 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Person details</CardTitle>
-            <CardDescription>
-              Update name, dates, occupation, and biography.
-            </CardDescription>
+            <CardTitle>{t("person.editFormTitle")}</CardTitle>
+            <CardDescription>{t("person.editDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <PersonForm familyId={familyId} person={person} mode="edit" />

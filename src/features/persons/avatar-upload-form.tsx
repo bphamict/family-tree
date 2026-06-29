@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PersonAvatar } from "@/components/shared/person-avatar";
 import { uploadPersonAvatarAction } from "@/features/persons/person-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Person } from "@/types/person";
 
 type AvatarUploadFormProps = {
@@ -16,6 +17,7 @@ type AvatarUploadFormProps = {
 };
 
 export function AvatarUploadForm({ familyId, person }: AvatarUploadFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -39,9 +41,12 @@ export function AvatarUploadForm({ familyId, person }: AvatarUploadFormProps) {
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
       <PersonAvatar person={person} size="lg" />
 
-      <form action={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
+      <form
+        action={handleSubmit}
+        className="flex w-full max-w-sm flex-col gap-3"
+      >
         <div className="grid gap-2">
-          <Label htmlFor="avatar">Upload avatar</Label>
+          <Label htmlFor="avatar">{t("person.uploadAvatar")}</Label>
           <Input
             id="avatar"
             name="avatar"
@@ -51,7 +56,7 @@ export function AvatarUploadForm({ familyId, person }: AvatarUploadFormProps) {
           />
         </div>
         <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? "Uploading..." : "Upload image"}
+          {isPending ? t("common.uploading") : t("person.uploadImage")}
         </Button>
       </form>
     </div>

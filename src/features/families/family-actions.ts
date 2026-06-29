@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 
 import {
   createFamilySchema,
-  inviteMemberSchema,
-  updateFamilySchema,
+  createInviteMemberSchema,
+  createUpdateFamilySchema,
   updateMemberRoleSchema,
 } from "@/features/families/family-schemas";
 import {
@@ -22,6 +22,8 @@ import {
   canManageFamily,
   canManageMembers,
 } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
+import { getFamilyValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/server";
 
 type ActionResult = {
@@ -32,14 +34,18 @@ type ActionResult = {
 export async function createFamilyAction(
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getFamilyValidationMessages(t);
   await requireUser();
-  const parsed = createFamilySchema.safeParse({
+  const parsed = createFamilySchema(validationMessages).safeParse({
     name: formData.get("name"),
     description: formData.get("description") || undefined,
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -71,20 +77,24 @@ export async function updateFamilyAction(
   familyId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getFamilyValidationMessages(t);
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManageFamily(family.membership.role)) {
-    return { error: "You do not have permission to update this family." };
+    return { error: t("family.errors.update") };
   }
 
-  const parsed = updateFamilySchema.safeParse({
+  const parsed = createUpdateFamilySchema(validationMessages).safeParse({
     name: formData.get("name"),
     description: formData.get("description") || undefined,
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -104,17 +114,18 @@ export async function updateFamilyAction(
   revalidatePath("/families");
   revalidatePath("/dashboard");
 
-  return { success: "Family updated successfully." };
+  return { success: t("family.toast.updated") };
 }
 
 export async function archiveFamilyAction(
   familyId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canArchiveFamily(family.membership.role)) {
-    return { error: "You do not have permission to archive this family." };
+    return { error: t("family.errors.archive") };
   }
 
   const supabase = await createClient();
@@ -131,17 +142,18 @@ export async function archiveFamilyAction(
   revalidatePath("/families");
   revalidatePath("/dashboard");
 
-  return { success: "Family archived successfully." };
+  return { success: t("family.toast.archived") };
 }
 
 export async function restoreFamilyAction(
   familyId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canArchiveFamily(family.membership.role)) {
-    return { error: "You do not have permission to restore this family." };
+    return { error: t("family.errors.restore") };
   }
 
   const supabase = await createClient();
@@ -158,7 +170,7 @@ export async function restoreFamilyAction(
   revalidatePath("/families");
   revalidatePath("/dashboard");
 
-  return { success: "Family restored successfully." };
+  return { success: t("family.toast.restored") };
 }
 
 export async function setActiveFamilyAction(familyId: string): Promise<void> {
@@ -166,7 +178,8 @@ export async function setActiveFamilyAction(familyId: string): Promise<void> {
   const membership = await getMembershipForUser(familyId, user.id);
 
   if (!membership) {
-    throw new Error("You are not a member of this family.");
+    const t = await getTranslations();
+    throw new Error(t("errors.notAuthenticated"));
   }
 
   const cookieStore = await cookies();
@@ -184,20 +197,24 @@ export async function inviteMemberAction(
   familyId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getFamilyValidationMessages(t);
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canInviteMembers(family.membership.role)) {
-    return { error: "You do not have permission to invite members." };
+    return { error: t("family.errors.invite") };
   }
 
-  const parsed = inviteMemberSchema.safeParse({
+  const parsed = createInviteMemberSchema(validationMessages).safeParse({
     email: formData.get("email"),
     role: formData.get("role"),
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -206,7 +223,7 @@ export async function inviteMemberAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated." };
+    return { error: t("errors.notAuthenticated") };
   }
 
   const { error } = await supabase.from("family_invitations").insert({
@@ -222,18 +239,19 @@ export async function inviteMemberAction(
 
   revalidatePath(`/families/${familyId}/members`);
 
-  return { success: "Invitation sent successfully." };
+  return { success: t("family.toast.invitationSent") };
 }
 
 export async function removeMemberAction(
   familyId: string,
   membershipId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManageMembers(family.membership.role)) {
-    return { error: "You do not have permission to remove members." };
+    return { error: t("family.errors.removeMember") };
   }
 
   const supabase = await createClient();
@@ -249,18 +267,19 @@ export async function removeMemberAction(
 
   revalidatePath(`/families/${familyId}/members`);
 
-  return { success: "Member removed successfully." };
+  return { success: t("family.toast.memberRemoved") };
 }
 
 export async function updateMemberRoleAction(
   familyId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManageMembers(family.membership.role)) {
-    return { error: "You do not have permission to update member roles." };
+    return { error: t("family.errors.updateRole") };
   }
 
   const parsed = updateMemberRoleSchema.safeParse({
@@ -269,7 +288,9 @@ export async function updateMemberRoleAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -286,18 +307,19 @@ export async function updateMemberRoleAction(
 
   revalidatePath(`/families/${familyId}/members`);
 
-  return { success: "Member role updated successfully." };
+  return { success: t("family.toast.roleUpdated") };
 }
 
 export async function cancelInvitationAction(
   familyId: string,
   invitationId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canInviteMembers(family.membership.role)) {
-    return { error: "You do not have permission to cancel invitations." };
+    return { error: t("family.errors.cancelInvitation") };
   }
 
   const supabase = await createClient();
@@ -313,7 +335,7 @@ export async function cancelInvitationAction(
 
   revalidatePath(`/families/${familyId}/members`);
 
-  return { success: "Invitation cancelled." };
+  return { success: t("family.toast.invitationCancelled") };
 }
 
 export async function acceptInvitationAction(
@@ -346,6 +368,7 @@ export async function acceptInvitationAction(
 export async function declineInvitationAction(
   invitationId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
 
   const supabase = await createClient();
@@ -361,5 +384,5 @@ export async function declineInvitationAction(
   revalidatePath("/dashboard");
   revalidatePath("/families");
 
-  return { success: "Invitation declined." };
+  return { success: t("family.toast.invitationDeclined") };
 }

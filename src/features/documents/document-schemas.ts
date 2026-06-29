@@ -6,31 +6,45 @@ import {
   MAX_DOCUMENT_SIZE_BYTES,
 } from "@/lib/document/constants";
 
-const optionalUuid = z
-  .string()
-  .uuid()
-  .optional()
-  .or(z.literal(""));
+type DocumentValidationMessages = {
+  titleRequired: string;
+  titleTooLong: string;
+  descriptionTooLong: string;
+  unsupportedType: string;
+  fileRequired: string;
+  fileTooLarge: string;
+};
 
-export const documentMetadataSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-  description: z.string().max(5000, "Description is too long").optional(),
-  personId: optionalUuid,
-  eventId: optionalUuid,
-});
+const optionalUuid = z.string().uuid().optional().or(z.literal(""));
 
-export const uploadDocumentSchema = documentMetadataSchema.extend({
-  mimeType: z
-    .string()
-    .refine((value) => ALLOWED_DOCUMENT_MIME_TYPES.has(value), {
-      message: "Unsupported file type",
-    }),
-  fileSize: z
-    .number()
-    .int()
-    .positive("File is required")
-    .max(MAX_DOCUMENT_SIZE_BYTES, "File is too large (max 50 MB)"),
-});
+function documentMetadataSchema(messages: DocumentValidationMessages) {
+  return z.object({
+    title: z
+      .string()
+      .min(1, messages.titleRequired)
+      .max(200, messages.titleTooLong),
+    description: z.string().max(5000, messages.descriptionTooLong).optional(),
+    personId: optionalUuid,
+    eventId: optionalUuid,
+  });
+}
+
+export function createUploadDocumentSchema(
+  messages: DocumentValidationMessages,
+) {
+  return documentMetadataSchema(messages).extend({
+    mimeType: z
+      .string()
+      .refine((value) => ALLOWED_DOCUMENT_MIME_TYPES.has(value), {
+        message: messages.unsupportedType,
+      }),
+    fileSize: z
+      .number()
+      .int()
+      .positive(messages.fileRequired)
+      .max(MAX_DOCUMENT_SIZE_BYTES, messages.fileTooLarge),
+  });
+}
 
 export const documentSearchSchema = z.object({
   documentType: z.enum(DOCUMENT_TYPES).optional(),
@@ -38,6 +52,10 @@ export const documentSearchSchema = z.object({
   eventId: optionalUuid,
 });
 
-export type DocumentMetadataInput = z.infer<typeof documentMetadataSchema>;
-export type UploadDocumentInput = z.infer<typeof uploadDocumentSchema>;
+export type DocumentMetadataInput = z.infer<
+  ReturnType<typeof documentMetadataSchema>
+>;
+export type UploadDocumentInput = z.infer<
+  ReturnType<typeof createUploadDocumentSchema>
+>;
 export type DocumentSearchInput = z.infer<typeof documentSearchSchema>;

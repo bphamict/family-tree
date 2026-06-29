@@ -19,6 +19,7 @@ import { getDocumentsByFamily } from "@/features/documents/document-service";
 import { getFamilyById } from "@/features/families/family-service";
 import { getPersonsByFamily } from "@/features/persons/person-service";
 import { canManageEvents } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 
 type EditEventPageProps = {
   params: Promise<{ familyId: string; eventId: string }>;
@@ -27,15 +28,19 @@ type EditEventPageProps = {
 export async function generateMetadata({
   params,
 }: EditEventPageProps): Promise<Metadata> {
+  const t = await getTranslations();
   const { familyId, eventId } = await params;
   const event = await getEventById(familyId, eventId);
 
   return {
-    title: event ? `Edit ${event.title}` : "Edit event",
+    title: event
+      ? `${t("event.editHeading")}: ${event.title}`
+      : t("event.editTitle"),
   };
 }
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
+  const t = await getTranslations();
   const { familyId, eventId } = await params;
   const family = await getFamilyById(familyId);
 
@@ -61,21 +66,21 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
-              Edit event
+              {t("event.editHeading")}
             </h1>
             <p className="text-muted-foreground">{event.title}</p>
           </div>
           <Button asChild variant="outline">
-            <Link href={`/families/${familyId}/timeline`}>Back to timeline</Link>
+            <Link href={`/families/${familyId}/timeline`}>
+              {t("common.backToTimeline")}
+            </Link>
           </Button>
         </section>
 
         <Card>
           <CardHeader>
-            <CardTitle>Event details</CardTitle>
-            <CardDescription>
-              Update the event information and linked participants.
-            </CardDescription>
+            <CardTitle>{t("event.editFormTitle")}</CardTitle>
+            <CardDescription>{t("event.editFormDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <EventForm
@@ -91,17 +96,15 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
           familyId={familyId}
           documents={eventDocuments}
           canManage
-          title="Event photos & documents"
-          description="Attach images, PDFs, or videos to this event."
+          title={t("event.eventDocumentsTitle")}
+          description={t("event.eventDocumentsDescription")}
           uploadHref={`/families/${familyId}/documents/new?eventId=${eventId}`}
         />
 
         <Card>
           <CardHeader>
-            <CardTitle>Delete event</CardTitle>
-            <CardDescription>
-              Permanently remove this event from the family timeline.
-            </CardDescription>
+            <CardTitle>{t("event.deleteTitle")}</CardTitle>
+            <CardDescription>{t("event.deleteDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <EventDeleteButton familyId={familyId} eventId={eventId} />

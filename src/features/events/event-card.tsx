@@ -10,11 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  EVENT_TYPE_COLORS,
-  EVENT_TYPE_LABELS,
-} from "@/lib/event/constants";
+import { EVENT_TYPE_COLORS } from "@/lib/event/constants";
 import { formatEventDate } from "@/lib/event/format";
+import { getTranslations } from "@/lib/i18n/translator";
 import { formatPersonName } from "@/types/person";
 import type { EventWithParticipants } from "@/types/event";
 
@@ -24,7 +22,13 @@ type EventCardProps = {
   canManage: boolean;
 };
 
-export function EventCard({ familyId, event, canManage }: EventCardProps) {
+export async function EventCard({
+  familyId,
+  event,
+  canManage,
+}: EventCardProps) {
+  const t = await getTranslations();
+
   return (
     <Card>
       <CardHeader className="gap-3">
@@ -32,7 +36,7 @@ export function EventCard({ familyId, event, canManage }: EventCardProps) {
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
-                {EVENT_TYPE_LABELS[event.event_type]}
+                {t(`event.types.${event.event_type}`)}
               </Badge>
               <span className="text-muted-foreground text-sm">
                 {formatEventDate(event.event_date)}
@@ -46,7 +50,7 @@ export function EventCard({ familyId, event, canManage }: EventCardProps) {
           {canManage && (
             <Button asChild variant="outline" size="sm">
               <Link href={`/families/${familyId}/events/${event.id}/edit`}>
-                Edit
+                {t("common.edit")}
               </Link>
             </Button>
           )}
@@ -60,7 +64,7 @@ export function EventCard({ familyId, event, canManage }: EventCardProps) {
         {event.participants.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-sm font-medium">
-              Participants
+              {t("common.participants")}
             </p>
             <div className="flex flex-wrap gap-2">
               {event.participants.map((participant) => (

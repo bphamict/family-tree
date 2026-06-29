@@ -5,10 +5,9 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  cancelInvitationAction,
-} from "@/features/families/family-actions";
-import { ROLE_LABELS } from "@/lib/family/constants";
+import { formatDisplayDate } from "@/lib/date/format";
+import { cancelInvitationAction } from "@/features/families/family-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { FamilyInvitation } from "@/types/family";
 
 type InvitationListProps = {
@@ -22,6 +21,7 @@ export function InvitationList({
   invitations,
   canManage,
 }: InvitationListProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleCancel(invitationId: string) {
@@ -39,7 +39,9 @@ export function InvitationList({
 
   if (invitations.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">No pending invitations.</p>
+      <p className="text-muted-foreground text-sm">
+        {t("family.noInvitations")}
+      </p>
     );
   }
 
@@ -53,12 +55,16 @@ export function InvitationList({
           <div className="flex flex-col gap-1">
             <p className="font-medium">{invitation.email}</p>
             <p className="text-muted-foreground text-sm">
-              Expires {new Date(invitation.expires_at).toLocaleDateString()}
+              {t("common.expires", {
+                date: formatDisplayDate(invitation.expires_at) ?? "",
+              })}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{ROLE_LABELS[invitation.role]}</Badge>
+            <Badge variant="outline">
+              {t(`family.roles.${invitation.role}`)}
+            </Badge>
             {canManage && (
               <Button
                 type="button"
@@ -67,7 +73,7 @@ export function InvitationList({
                 onClick={() => handleCancel(invitation.id)}
                 disabled={isPending}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
             )}
           </div>

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -18,17 +18,26 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  registerSchema,
+  createRegisterSchema,
   type RegisterInput,
 } from "@/features/auth/auth-schemas";
 import { signUpWithEmail } from "@/features/auth/auth-service";
+import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function RegisterForm() {
+  const t = useTranslations();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const validationMessages = useMemo(() => getAuthValidationMessages(t), [t]);
+  const schema = useMemo(
+    () => createRegisterSchema(validationMessages),
+    [validationMessages],
+  );
+
   const form = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       fullName: "",
       email: "",
@@ -49,27 +58,34 @@ export function RegisterForm() {
     }
 
     if (data.session) {
-      toast.success("Account created successfully");
+      toast.success(t("auth.accountCreated"));
       router.push("/dashboard");
       router.refresh();
       return;
     }
 
-    toast.success("Check your email to confirm your account");
+    toast.success(t("auth.checkEmail"));
     router.push("/login");
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="fullName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full name</FormLabel>
+              <FormLabel>{t("common.fullName")}</FormLabel>
               <FormControl>
-                <Input autoComplete="name" placeholder="Jane Doe" {...field} />
+                <Input
+                  autoComplete="name"
+                  placeholder={t("auth.namePlaceholder")}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,12 +97,12 @@ export function RegisterForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("common.email")}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -100,13 +116,9 @@ export function RegisterForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t("auth.password")}</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,13 +130,9 @@ export function RegisterForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm password</FormLabel>
+              <FormLabel>{t("auth.confirmPassword")}</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,13 +140,16 @@ export function RegisterForm() {
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? t("auth.creatingAccount") : t("common.createAccount")}
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">
-          Already have an account?{" "}
-          <Link href="/login" className="text-foreground font-medium hover:underline">
-            Sign in
+          {t("auth.hasAccount")}{" "}
+          <Link
+            href="/login"
+            className="text-foreground font-medium hover:underline"
+          >
+            {t("common.signIn")}
           </Link>
         </p>
       </form>

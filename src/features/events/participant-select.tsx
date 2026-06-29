@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import { formatPersonName, type Person } from "@/types/person";
 
 type ParticipantSelectProps = {
@@ -17,6 +18,7 @@ export function ParticipantSelect({
   selectedIds,
   disabled = false,
 }: ParticipantSelectProps) {
+  const t = useTranslations();
   const [query, setQuery] = useState("");
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -31,10 +33,10 @@ export function ParticipantSelect({
   return (
     <div className="flex flex-col gap-3">
       <div className="grid gap-2">
-        <Label htmlFor="participantSearch">Participants</Label>
+        <Label htmlFor="participantSearch">{t("common.participants")}</Label>
         <Input
           id="participantSearch"
-          placeholder="Search family members..."
+          placeholder={t("event.searchParticipants")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           disabled={disabled}
@@ -43,7 +45,7 @@ export function ParticipantSelect({
 
       {persons.length === 0 ? (
         <p className="text-muted-foreground text-sm">
-          Add family members before linking them to events.
+          {t("event.noMembersForParticipants")}
         </p>
       ) : (
         <div className="max-h-56 overflow-y-auto rounded-md border p-3">
@@ -66,7 +68,7 @@ export function ParticipantSelect({
             ))}
             {filteredPersons.length === 0 && (
               <p className="text-muted-foreground text-sm">
-                No members match your search.
+                {t("event.noSearchResults")}
               </p>
             )}
           </div>

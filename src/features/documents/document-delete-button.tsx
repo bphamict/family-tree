@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { deleteDocumentAction } from "@/features/documents/document-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 type DocumentDeleteButtonProps = {
   familyId: string;
@@ -15,11 +16,12 @@ export function DocumentDeleteButton({
   familyId,
   documentId,
 }: DocumentDeleteButtonProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
     const confirmed = window.confirm(
-      "Delete this document? This action cannot be undone.",
+      t("document.deleteConfirm", { confirm: t("common.confirmDelete") }),
     );
 
     if (!confirmed) {
@@ -48,7 +50,7 @@ export function DocumentDeleteButton({
       onClick={handleDelete}
       disabled={isPending}
     >
-      {isPending ? "Deleting..." : "Delete"}
+      {isPending ? t("common.deleting") : t("common.delete")}
     </Button>
   );
 }

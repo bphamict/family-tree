@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { inviteMemberAction } from "@/features/families/family-actions";
-import { INVITABLE_ROLES, ROLE_LABELS } from "@/lib/family/constants";
+import { INVITABLE_ROLES } from "@/lib/family/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { InvitableRole } from "@/types/family";
 
 type InviteMemberFormProps = {
@@ -22,6 +23,7 @@ type InviteMemberFormProps = {
 };
 
 export function InviteMemberForm({ familyId }: InviteMemberFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [role, setRole] = useState<InvitableRole>("viewer");
 
@@ -43,19 +45,21 @@ export function InviteMemberForm({ familyId }: InviteMemberFormProps) {
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="email">Email address</Label>
+        <Label htmlFor="email">{t("family.inviteEmail")}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="member@example.com"
+          placeholder={t("family.inviteEmailPlaceholder")}
           required
           disabled={isPending}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="role">Role</Label>
+        <Label htmlFor="role">
+          {t("common.role", { role: "" }).replace(/: $/, "")}
+        </Label>
         <Select
           value={role}
           onValueChange={(value) => setRole(value as InvitableRole)}
@@ -67,7 +71,7 @@ export function InviteMemberForm({ familyId }: InviteMemberFormProps) {
           <SelectContent>
             {INVITABLE_ROLES.map((invitableRole) => (
               <SelectItem key={invitableRole} value={invitableRole}>
-                {ROLE_LABELS[invitableRole]}
+                {t(`family.roles.${invitableRole}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -76,7 +80,7 @@ export function InviteMemberForm({ familyId }: InviteMemberFormProps) {
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Sending..." : "Send invitation"}
+        {isPending ? t("common.sending") : t("family.sendInvitation")}
       </Button>
     </form>
   );

@@ -8,11 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  EVENT_TYPE_COLORS,
-  EVENT_TYPE_LABELS,
-} from "@/lib/event/constants";
+import { EVENT_TYPE_COLORS } from "@/lib/event/constants";
 import { formatEventDate } from "@/lib/event/format";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { EventWithParticipants } from "@/types/event";
 
 type PersonEventsSectionProps = {
@@ -20,10 +18,12 @@ type PersonEventsSectionProps = {
   events: EventWithParticipants[];
 };
 
-export function PersonEventsSection({
+export async function PersonEventsSection({
   familyId,
   events,
 }: PersonEventsSectionProps) {
+  const t = await getTranslations();
+
   if (events.length === 0) {
     return null;
   }
@@ -31,10 +31,8 @@ export function PersonEventsSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Events</CardTitle>
-        <CardDescription>
-          Family events linked to this person.
-        </CardDescription>
+        <CardTitle>{t("event.personEventsTitle")}</CardTitle>
+        <CardDescription>{t("event.personEventsDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {events.map((event) => (
@@ -45,7 +43,7 @@ export function PersonEventsSection({
           >
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
-                {EVENT_TYPE_LABELS[event.event_type]}
+                {t(`event.types.${event.event_type}`)}
               </Badge>
               <span className="text-muted-foreground text-sm">
                 {formatEventDate(event.event_date)}

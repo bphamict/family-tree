@@ -1,17 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Person } from "@/types/person";
-import type {
-  TreeEdge,
-  TreePerson,
-  TreeSubgraph,
-} from "@/types/tree";
+import type { TreeEdge, TreePerson, TreeSubgraph } from "@/types/tree";
 import type { StoredRelationshipType } from "@/types/relationship";
 
 const PERSON_SELECT =
-  "id, first_name, middle_name, last_name, gender, birth_date, death_date, avatar_url";
+  "id, first_name, middle_name, last_name, other_name, gender, birth_date, death_date, avatar_url";
 
 const RELATIONSHIP_SELECT =
-  "id, person1_id, person2_id, relationship_type";
+  "id, person1_id, person2_id, relationship_type, birth_order";
 
 type NeighborResult = {
   parents: TreePerson[];
@@ -29,8 +25,9 @@ function createEdge(
   sourceId: string,
   targetId: string,
   type: StoredRelationshipType,
+  birthOrder: number | null = null,
 ): TreeEdge {
-  return { id, sourceId, targetId, type };
+  return { id, sourceId, targetId, type, birthOrder };
 }
 
 export async function getPersonTreeNeighbors(
@@ -56,6 +53,7 @@ export async function getPersonTreeNeighbors(
 
   for (const row of data ?? []) {
     const relationshipType = row.relationship_type as StoredRelationshipType;
+    const birthOrder = (row.birth_order as number | null) ?? null;
     const person1 = row.person1 as TreePerson | null;
     const person2 = row.person2 as TreePerson | null;
 
@@ -67,7 +65,13 @@ export async function getPersonTreeNeighbors(
       const spouse = person1.id === personId ? person2 : person1;
       spouses.push(spouse);
       edges.push(
-        createEdge(row.id, person1.id, person2.id, relationshipType),
+        createEdge(
+          row.id,
+          person1.id,
+          person2.id,
+          relationshipType,
+          birthOrder,
+        ),
       );
       continue;
     }
@@ -79,12 +83,24 @@ export async function getPersonTreeNeighbors(
       if (row.person2_id === personId) {
         parents.push(person1);
         edges.push(
-          createEdge(row.id, person1.id, person2.id, relationshipType),
+          createEdge(
+            row.id,
+            person1.id,
+            person2.id,
+            relationshipType,
+            birthOrder,
+          ),
         );
       } else if (row.person1_id === personId) {
         children.push(person2);
         edges.push(
-          createEdge(row.id, person1.id, person2.id, relationshipType),
+          createEdge(
+            row.id,
+            person1.id,
+            person2.id,
+            relationshipType,
+            birthOrder,
+          ),
         );
       }
       continue;
@@ -94,12 +110,24 @@ export async function getPersonTreeNeighbors(
       if (row.person2_id === personId) {
         parents.push(person1);
         edges.push(
-          createEdge(row.id, person1.id, person2.id, relationshipType),
+          createEdge(
+            row.id,
+            person1.id,
+            person2.id,
+            relationshipType,
+            birthOrder,
+          ),
         );
       } else if (row.person1_id === personId) {
         children.push(person2);
         edges.push(
-          createEdge(row.id, person1.id, person2.id, relationshipType),
+          createEdge(
+            row.id,
+            person1.id,
+            person2.id,
+            relationshipType,
+            birthOrder,
+          ),
         );
       }
     }
@@ -193,15 +221,13 @@ export async function getTreeSubgraph(
   };
 }
 
-export async function getPersonsForTree(
-  familyId: string,
-): Promise<Person[]> {
+export async function getPersonsForTree(familyId: string): Promise<Person[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("persons")
     .select(
-      "id, family_id, branch_id, first_name, middle_name, last_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at",
+      "id, family_id, branch_id, first_name, middle_name, last_name, other_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at",
     )
     .eq("family_id", familyId)
     .is("archived_at", null)
@@ -259,11 +285,19 @@ async function traverseDirection({
           edge.type === "adoptive_parent" ||
           edge.type === "guardian";
 
-        if (direction === "ancestors" && isAncestorEdge && edge.targetId === personId) {
+        if (
+          direction === "ancestors" &&
+          isAncestorEdge &&
+          edge.targetId === personId
+        ) {
           edgeMap.set(edge.id, edge);
         }
 
-        if (direction === "descendants" && isAncestorEdge && edge.sourceId === personId) {
+        if (
+          direction === "descendants" &&
+          isAncestorEdge &&
+          edge.sourceId === personId
+        ) {
           edgeMap.set(edge.id, edge);
         }
       }

@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPES } from "@/lib/document/constants";
+import { DOCUMENT_TYPES } from "@/lib/document/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { DocumentSearchFilters, DocumentType } from "@/types/document";
 import { formatPersonName, type Person } from "@/types/person";
 import type { Event } from "@/types/event";
@@ -28,6 +29,7 @@ export function DocumentFilterForm({
   persons,
   events,
 }: DocumentFilterFormProps) {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -56,24 +58,25 @@ export function DocumentFilterForm({
   return (
     <div className="grid gap-4 rounded-lg border p-4 md:grid-cols-4">
       <div className="grid gap-2">
-        <Label htmlFor="documentType">Type</Label>
+        <Label htmlFor="documentType">{t("common.type")}</Label>
         <Select
           value={filters.documentType ?? "all"}
           onValueChange={(value) =>
             updateFilters({
-              documentType: value === "all" ? undefined : (value as DocumentType),
+              documentType:
+                value === "all" ? undefined : (value as DocumentType),
             })
           }
           disabled={isPending}
         >
           <SelectTrigger id="documentType">
-            <SelectValue placeholder="All types" />
+            <SelectValue placeholder={t("common.allTypes")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="all">{t("common.allTypes")}</SelectItem>
             {DOCUMENT_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
-                {DOCUMENT_TYPE_LABELS[type]}
+                {t(`document.types.${type}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -81,7 +84,7 @@ export function DocumentFilterForm({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="personId">Person</Label>
+        <Label htmlFor="personId">{t("common.person")}</Label>
         <Select
           value={filters.personId ?? "all"}
           onValueChange={(value) =>
@@ -92,10 +95,10 @@ export function DocumentFilterForm({
           disabled={isPending}
         >
           <SelectTrigger id="personId">
-            <SelectValue placeholder="All persons" />
+            <SelectValue placeholder={t("common.allPersons")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All persons</SelectItem>
+            <SelectItem value="all">{t("common.allPersons")}</SelectItem>
             {persons.map((person) => (
               <SelectItem key={person.id} value={person.id}>
                 {formatPersonName(person)}
@@ -106,7 +109,7 @@ export function DocumentFilterForm({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="eventId">Event</Label>
+        <Label htmlFor="eventId">{t("common.event")}</Label>
         <Select
           value={filters.eventId ?? "all"}
           onValueChange={(value) =>
@@ -117,10 +120,10 @@ export function DocumentFilterForm({
           disabled={isPending}
         >
           <SelectTrigger id="eventId">
-            <SelectValue placeholder="All events" />
+            <SelectValue placeholder={t("common.allEvents")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All events</SelectItem>
+            <SelectItem value="all">{t("common.allEvents")}</SelectItem>
             {events.map((event) => (
               <SelectItem key={event.id} value={event.id}>
                 {event.title}
@@ -144,7 +147,7 @@ export function DocumentFilterForm({
               })
             }
           >
-            Clear filters
+            {t("common.clearFilters")}
           </Button>
         )}
       </div>

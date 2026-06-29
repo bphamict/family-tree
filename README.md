@@ -43,14 +43,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start Next.js dev server |
-| `pnpm build` | Production build |
-| `pnpm lint` | Run ESLint |
-| `pnpm db:start` | Start local Supabase |
-| `pnpm db:stop` | Stop local Supabase |
-| `pnpm db:reset` | Reset DB and run migrations |
+| Command         | Description                             |
+| --------------- | --------------------------------------- |
+| `pnpm dev`      | Start Next.js dev server                |
+| `pnpm build`    | Production build                        |
+| `pnpm lint`     | Run ESLint                              |
+| `pnpm db:start` | Start local Supabase                    |
+| `pnpm db:stop`  | Stop local Supabase                     |
+| `pnpm db:reset` | Reset DB and run migrations             |
 | `pnpm db:types` | Regenerate TypeScript types from schema |
 
 ## Project Structure

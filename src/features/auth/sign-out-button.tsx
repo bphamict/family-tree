@@ -7,8 +7,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/auth-service";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function SignOutButton() {
+  const t = useTranslations();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -23,20 +25,20 @@ export function SignOutButton() {
       return;
     }
 
-    toast.success("Signed out successfully");
+    toast.success(t("auth.signedOut"));
     router.push("/login");
     router.refresh();
   }
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
       onClick={handleSignOut}
       disabled={isSigningOut}
+      aria-label={isSigningOut ? t("common.signingOut") : t("common.signOut")}
     >
-      <LogOut className="size-4" aria-hidden="true" />
-      {isSigningOut ? "Signing out..." : "Sign out"}
+      <LogOut className="size-4" aria-hidden />
     </Button>
   );
 }

@@ -1,9 +1,7 @@
 "use server";
 
 import { getFamilyById } from "@/features/families/family-service";
-import {
-  getTreeSubgraph,
-} from "@/features/family-tree/tree-service";
+import { getTreeSubgraph } from "@/features/family-tree/tree-service";
 import { requireUser } from "@/lib/auth/require-user";
 import { canViewPersons } from "@/lib/family/permissions";
 import {
@@ -43,9 +41,5 @@ export async function fetchTreeSubgraphAction({
     MAX_TREE_DEPTH,
   );
 
-  return getTreeSubgraph(
-    rootPersonId,
-    safeAncestorDepth,
-    safeDescendantDepth,
-  );
+  return getTreeSubgraph(rootPersonId, safeAncestorDepth, safeDescendantDepth);
 }

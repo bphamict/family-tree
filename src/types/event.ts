@@ -1,10 +1,5 @@
 export type EventType =
-  | "birth"
-  | "death"
-  | "wedding"
-  | "memorial"
-  | "reunion"
-  | "other";
+  "birth" | "death" | "wedding" | "memorial" | "reunion" | "other";
 
 export type Event = {
   id: string;

@@ -6,11 +6,13 @@ import { redirect } from "next/navigation";
 import { getFamilyById } from "@/features/families/family-service";
 import {
   createPersonSchema,
-  updatePersonSchema,
+  createUpdatePersonSchema,
 } from "@/features/persons/person-schemas";
 import { getPersonById } from "@/features/persons/person-service";
 import { requireUser } from "@/lib/auth/require-user";
 import { canManagePersons } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
+import { getPersonValidationMessages } from "@/lib/i18n/validation-messages";
 import { PERSON_AVATARS_BUCKET } from "@/lib/person/constants";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +26,7 @@ function parsePersonFormData(formData: FormData) {
     firstName: formData.get("firstName"),
     middleName: formData.get("middleName") || undefined,
     lastName: formData.get("lastName"),
+    otherName: formData.get("otherName") || undefined,
     gender: formData.get("gender") || undefined,
     birthDate: formData.get("birthDate") || undefined,
     deathDate: formData.get("deathDate") || undefined,
@@ -36,6 +39,7 @@ function toPersonPayload(input: {
   firstName: string;
   middleName?: string;
   lastName: string;
+  otherName?: string;
   gender?: string;
   birthDate?: string;
   deathDate?: string;
@@ -46,6 +50,7 @@ function toPersonPayload(input: {
     first_name: input.firstName,
     middle_name: input.middleName || null,
     last_name: input.lastName,
+    other_name: input.otherName || null,
     gender: input.gender || null,
     birth_date: input.birthDate || null,
     death_date: input.deathDate || null,
@@ -55,11 +60,12 @@ function toPersonPayload(input: {
 }
 
 async function requirePersonManagement(familyId: string) {
+  const t = await getTranslations();
   await requireUser();
   const family = await getFamilyById(familyId);
 
   if (!family || !canManagePersons(family.membership.role)) {
-    return { error: "You do not have permission to manage persons." };
+    return { error: t("person.errors.manage") };
   }
 
   return { family };
@@ -79,16 +85,22 @@ export async function createPersonAction(
   familyId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getPersonValidationMessages(t);
   const permission = await requirePersonManagement(familyId);
 
   if ("error" in permission && permission.error) {
     return { error: permission.error };
   }
 
-  const parsed = createPersonSchema.safeParse(parsePersonFormData(formData));
+  const parsed = createPersonSchema(validationMessages).safeParse(
+    parsePersonFormData(formData),
+  );
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -114,16 +126,22 @@ export async function updatePersonAction(
   personId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
+  const validationMessages = getPersonValidationMessages(t);
   const permission = await requirePersonManagement(familyId);
 
   if ("error" in permission && permission.error) {
     return { error: permission.error };
   }
 
-  const parsed = updatePersonSchema.safeParse(parsePersonFormData(formData));
+  const parsed = createUpdatePersonSchema(validationMessages).safeParse(
+    parsePersonFormData(formData),
+  );
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      error: parsed.error.issues[0]?.message ?? t("errors.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -139,13 +157,14 @@ export async function updatePersonAction(
 
   revalidatePersonPaths(familyId, personId);
 
-  return { success: "Person updated successfully." };
+  return { success: t("person.toast.updated") };
 }
 
 export async function archivePersonAction(
   familyId: string,
   personId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   const permission = await requirePersonManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -165,13 +184,14 @@ export async function archivePersonAction(
 
   revalidatePersonPaths(familyId, personId);
 
-  return { success: "Person archived successfully." };
+  return { success: t("person.toast.archived") };
 }
 
 export async function restorePersonAction(
   familyId: string,
   personId: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   const permission = await requirePersonManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -191,7 +211,7 @@ export async function restorePersonAction(
 
   revalidatePersonPaths(familyId, personId);
 
-  return { success: "Person restored successfully." };
+  return { success: t("person.toast.restored") };
 }
 
 export async function uploadPersonAvatarAction(
@@ -199,6 +219,7 @@ export async function uploadPersonAvatarAction(
   personId: string,
   formData: FormData,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   const permission = await requirePersonManagement(familyId);
 
   if ("error" in permission && permission.error) {
@@ -208,13 +229,13 @@ export async function uploadPersonAvatarAction(
   const person = await getPersonById(familyId, personId);
 
   if (!person) {
-    return { error: "Person not found." };
+    return { error: t("person.errors.notFound") };
   }
 
   const file = formData.get("avatar");
 
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Please select an image file." };
+    return { error: t("person.errors.selectImage") };
   }
 
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
@@ -248,5 +269,5 @@ export async function uploadPersonAvatarAction(
 
   revalidatePersonPaths(familyId, personId);
 
-  return { success: "Avatar uploaded successfully." };
+  return { success: t("person.toast.avatarUploaded") };
 }

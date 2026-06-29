@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/card";
 import { SupabaseStatus } from "@/components/shared/supabase-status";
 import { getUser } from "@/lib/auth/get-user";
+import { getTranslations } from "@/lib/i18n/translator";
 import { checkSupabaseHealth } from "@/lib/supabase/health";
 
 export default async function Home() {
+  const t = await getTranslations();
   const [supabaseHealth, user] = await Promise.all([
     checkSupabaseHealth(),
     getUser(),
@@ -26,23 +28,22 @@ export default async function Home() {
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
         <section className="flex flex-col gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">
-            Family Tree Management System
+            {t("home.title")}
           </h1>
           <p className="text-muted-foreground max-w-2xl text-lg">
-            Preserve, manage, and visualize your family genealogy. Collaborate
-            securely with role-based access across multiple families.
+            {t("home.subtitle")}
           </p>
           {user ? (
             <Button asChild className="w-fit">
-              <Link href="/dashboard">Go to dashboard</Link>
+              <Link href="/dashboard">{t("home.goToDashboard")}</Link>
             </Button>
           ) : (
             <div className="flex gap-3">
               <Button asChild>
-                <Link href="/register">Get started</Link>
+                <Link href="/register">{t("home.getStarted")}</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/login">Sign in</Link>
+                <Link href="/login">{t("common.signIn")}</Link>
               </Button>
             </div>
           )}
@@ -51,10 +52,8 @@ export default async function Home() {
         <section className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Project status</CardTitle>
-              <CardDescription>
-              Phase 8 — documents and media archive are available.
-              </CardDescription>
+              <CardTitle>{t("home.projectStatus")}</CardTitle>
+              <CardDescription>{t("home.phaseStatus")}</CardDescription>
             </CardHeader>
             <CardContent>
               <SupabaseStatus health={supabaseHealth} />
@@ -63,9 +62,9 @@ export default async function Home() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Getting started</CardTitle>
+              <CardTitle>{t("home.gettingStarted")}</CardTitle>
               <CardDescription>
-                Create an account to begin managing your family tree.
+                {t("home.gettingStartedDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
@@ -79,12 +78,18 @@ export default async function Home() {
                   start Supabase locally
                 </li>
                 <li>
-                  <Link href="/register" className="text-foreground hover:underline">
-                    Create an account
+                  <Link
+                    href="/register"
+                    className="text-foreground hover:underline"
+                  >
+                    {t("home.stepRegister")}
                   </Link>{" "}
-                  or{" "}
-                  <Link href="/login" className="text-foreground hover:underline">
-                    sign in
+                  {t("home.or")}{" "}
+                  <Link
+                    href="/login"
+                    className="text-foreground hover:underline"
+                  >
+                    {t("home.stepSignIn")}
                   </Link>
                 </li>
               </ol>

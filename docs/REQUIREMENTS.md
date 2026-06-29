@@ -12,11 +12,11 @@ The system allows authorized users to maintain family members, relationships, ev
 
 The application should:
 
-* Preserve family history digitally.
-* Visualize family relationships.
-* Support collaboration among family members.
-* Protect sensitive family information.
-* Scale to support multiple families.
+- Preserve family history digitally.
+- Visualize family relationships.
+- Support collaboration among family members.
+- Protect sensitive family information.
+- Scale to support multiple families.
 
 ---
 
@@ -28,9 +28,9 @@ Responsible for system-wide administration.
 
 Permissions:
 
-* Manage all families
-* Manage users
-* Manage system settings
+- Manage all families
+- Manage users
+- Manage system settings
 
 ---
 
@@ -40,10 +40,10 @@ Responsible for a single family.
 
 Permissions:
 
-* Manage family information
-* Invite members
-* Assign roles
-* Manage all family data
+- Manage family information
+- Invite members
+- Assign roles
+- Manage all family data
 
 ---
 
@@ -51,15 +51,15 @@ Permissions:
 
 Permissions:
 
-* Create members
-* Update members
-* Upload documents
-* Manage events
+- Create members
+- Update members
+- Upload documents
+- Manage events
 
 Cannot:
 
-* Delete family
-* Manage permissions
+- Delete family
+- Manage permissions
 
 ---
 
@@ -67,9 +67,9 @@ Cannot:
 
 Permissions:
 
-* View family tree
-* Search members
-* View documents
+- View family tree
+- Search members
+- View documents
 
 Cannot modify any data.
 
@@ -81,10 +81,10 @@ Cannot modify any data.
 
 The system shall:
 
-* Support email authentication.
-* Support password reset.
-* Support secure sessions.
-* Support role-based authorization.
+- Support email authentication.
+- Support password reset.
+- Support secure sessions.
+- Support role-based authorization.
 
 ---
 
@@ -92,10 +92,10 @@ The system shall:
 
 The system shall:
 
-* Create a family.
-* Edit family information.
-* Archive a family.
-* Manage multiple families.
+- Create a family.
+- Edit family information.
+- Archive a family.
+- Manage multiple families.
 
 ---
 
@@ -103,9 +103,9 @@ The system shall:
 
 The system shall:
 
-* Create family branches.
-* Support nested branches.
-* Move members between branches.
+- Create family branches.
+- Support nested branches.
+- Move members between branches.
 
 ---
 
@@ -113,13 +113,13 @@ The system shall:
 
 The system shall:
 
-* Create a member.
-* Update member information.
-* Archive members.
-* Upload avatars.
-* Store biographies.
-* Store occupations.
-* Store birth and death information.
+- Create a member.
+- Update member information.
+- Archive members.
+- Upload avatars.
+- Store biographies.
+- Store occupations.
+- Store birth and death information.
 
 ---
 
@@ -127,10 +127,10 @@ The system shall:
 
 The system shall support:
 
-* Parent-child relationships.
-* Marriage relationships.
-* Adoption.
-* Guardianship.
+- Parent-child relationships.
+- Marriage relationships.
+- Adoption.
+- Guardianship.
 
 The system shall allow multiple marriages.
 
@@ -140,13 +140,13 @@ The system shall allow multiple marriages.
 
 The system shall:
 
-* Display ancestors.
-* Display descendants.
-* Display spouses.
-* Expand and collapse nodes.
-* Zoom and pan.
-* Search members.
-* Navigate between relatives.
+- Display ancestors.
+- Display descendants.
+- Display spouses.
+- Expand and collapse nodes.
+- Zoom and pan.
+- Search members.
+- Navigate between relatives.
 
 ---
 
@@ -154,11 +154,11 @@ The system shall:
 
 The system shall display:
 
-* Births
-* Deaths
-* Weddings
-* Memorials
-* Family events
+- Births
+- Deaths
+- Weddings
+- Memorials
+- Family events
 
 sorted chronologically.
 
@@ -168,11 +168,11 @@ sorted chronologically.
 
 Users shall:
 
-* Create events.
-* Edit events.
-* Delete events.
-* Invite participants.
-* Attach photos.
+- Create events.
+- Edit events.
+- Delete events.
+- Invite participants.
+- Attach photos.
 
 ---
 
@@ -180,16 +180,16 @@ Users shall:
 
 The system shall support:
 
-* Image upload
-* PDF upload
-* Video upload
-* Historical documents
+- Image upload
+- PDF upload
+- Video upload
+- Historical documents
 
 Documents shall be linked to:
 
-* Family
-* Person
-* Event
+- Family
+- Person
+- Event
 
 ---
 
@@ -197,12 +197,12 @@ Documents shall be linked to:
 
 Users shall search by:
 
-* Name
-* Branch
-* Birth year
-* Death year
-* Gender
-* Occupation
+- Name
+- Branch
+- Birth year
+- Death year
+- Gender
+- Occupation
 
 ---
 
@@ -210,14 +210,14 @@ Users shall search by:
 
 The system shall support:
 
-* CSV import
-* Excel import
-* PDF export
-* Excel export
+- CSV import
+- Excel import
+- PDF export
+- Excel export
 
 Future:
 
-* GEDCOM import/export
+- GEDCOM import/export
 
 ---
 
@@ -225,18 +225,18 @@ Future:
 
 ## Performance
 
-* Page load under 2 seconds.
-* Family tree rendering should be lazy-loaded.
-* Large family trees should remain responsive.
+- Page load under 2 seconds.
+- Family tree rendering should be lazy-loaded.
+- Large family trees should remain responsive.
 
 ---
 
 ## Security
 
-* Row Level Security (RLS)
-* Role-based permissions
-* Secure authentication
-* Audit logging
+- Row Level Security (RLS)
+- Role-based permissions
+- Secure authentication
+- Audit logging
 
 ---
 
@@ -244,17 +244,17 @@ Future:
 
 The system should support:
 
-* Thousands of members
-* Multiple families
-* Large document libraries
+- Thousands of members
+- Multiple families
+- Large document libraries
 
 ---
 
 ## Availability
 
-* Cloud deployment
-* Automatic backups
-* High availability
+- Cloud deployment
+- Automatic backups
+- High availability
 
 ---
 
@@ -262,23 +262,23 @@ The system should support:
 
 The application should:
 
-* Support keyboard navigation.
-* Meet WCAG accessibility guidelines.
-* Provide proper ARIA labels.
+- Support keyboard navigation.
+- Meet WCAG accessibility guidelines.
+- Provide proper ARIA labels.
 
 ---
 
 # Future Features
 
-* QR Codes
-* AI relationship suggestions
-* Mobile application
-* Multi-language support
-* Notifications
-* Public family tree sharing
-* Cemetery management
-* Printable family book
-* Version history
+- QR Codes
+- AI relationship suggestions
+- Mobile application
+- Multi-language support
+- Notifications
+- Public family tree sharing
+- Cemetery management
+- Printable family book
+- Version history
 
 ---
 
@@ -286,8 +286,8 @@ The application should:
 
 The project will be considered successful when users can:
 
-* Manage multiple families.
-* Maintain complete genealogy information.
-* Visualize family relationships interactively.
-* Collaborate securely.
-* Preserve family history digitally.
+- Manage multiple families.
+- Maintain complete genealogy information.
+- Visualize family relationships interactively.
+- Collaborate securely.
+- Preserve family history digitally.

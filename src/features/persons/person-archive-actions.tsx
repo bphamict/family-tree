@@ -8,6 +8,7 @@ import {
   archivePersonAction,
   restorePersonAction,
 } from "@/features/persons/person-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Person } from "@/types/person";
 
 type PersonArchiveActionsProps = {
@@ -19,6 +20,7 @@ export function PersonArchiveActions({
   familyId,
   person,
 }: PersonArchiveActionsProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const isArchived = Boolean(person.archived_at);
 
@@ -45,10 +47,10 @@ export function PersonArchiveActions({
       disabled={isPending}
     >
       {isPending
-        ? "Saving..."
+        ? t("common.saving")
         : isArchived
-          ? "Restore person"
-          : "Archive person"}
+          ? t("person.restorePerson")
+          : t("person.archivePerson")}
     </Button>
   );
 }

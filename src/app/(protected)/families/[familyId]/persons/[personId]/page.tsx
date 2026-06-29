@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft, Network, Pencil } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/shared/app-header";
@@ -31,7 +32,8 @@ import {
   canManageDocuments,
   canViewPersons,
 } from "@/lib/family/permissions";
-import { GENDER_LABELS } from "@/lib/person/constants";
+import { formatDisplayDate } from "@/lib/date/format";
+import { getTranslations } from "@/lib/i18n/translator";
 import { formatPersonName } from "@/types/person";
 
 type PersonDetailPageProps = {
@@ -41,17 +43,19 @@ type PersonDetailPageProps = {
 export async function generateMetadata({
   params,
 }: PersonDetailPageProps): Promise<Metadata> {
+  const t = await getTranslations();
   const { familyId, personId } = await params;
   const person = await getPersonById(familyId, personId);
 
   return {
-    title: person ? formatPersonName(person) : "Person profile",
+    title: person ? formatPersonName(person) : t("person.profileTitle"),
   };
 }
 
 export default async function PersonDetailPage({
   params,
 }: PersonDetailPageProps) {
+  const t = await getTranslations();
   const { familyId, personId } = await params;
   const family = await getFamilyById(familyId);
 
@@ -71,29 +75,36 @@ export default async function PersonDetailPage({
 
   const [relationshipGroups, personOptions, personEvents, personDocuments] =
     await Promise.all([
-    getRelationshipsForPerson(familyId, personId),
-    canManage
-      ? getPersonOptionsForRelationships(familyId, personId)
-      : Promise.resolve([]),
-    getEventsForPerson(familyId, personId),
-    getDocumentsByFamily(familyId, { personId }),
-  ]);
+      getRelationshipsForPerson(familyId, personId),
+      canManage
+        ? getPersonOptionsForRelationships(familyId, personId)
+        : Promise.resolve([]),
+      getEventsForPerson(familyId, personId),
+      getDocumentsByFamily(familyId, { personId }),
+    ]);
 
   return (
     <div className="flex flex-1 flex-col">
       <AppHeader />
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        <section className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <PersonAvatar person={person} size="lg" />
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-semibold tracking-tight">
                   {formatPersonName(person)}
                 </h1>
-                {isArchived && <Badge variant="secondary">Archived</Badge>}
+                {isArchived && (
+                  <Badge variant="secondary">{t("common.archived")}</Badge>
+                )}
               </div>
+              {person.other_name && (
+                <p className="text-muted-foreground text-lg">
+                  {person.other_name}
+                </p>
+              )}
               {person.occupation && (
                 <p className="text-muted-foreground text-lg">
                   {person.occupation}
@@ -103,49 +114,92 @@ export default async function PersonDetailPage({
           </div>
 
           <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link href={`/families/${familyId}/tree?root=${personId}`}>
-                View in tree
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}/tree?root=${personId}`}
+                aria-label={t("common.viewInTree")}
+              >
+                <Network className="size-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href={`/families/${familyId}/persons`}>Back to list</Link>
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}/persons`}
+                aria-label={t("common.backToList")}
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
             </Button>
-            {canManage && (
-              <Button asChild>
-                <Link href={`/families/${familyId}/persons/${personId}/edit`}>
-                  Edit
-                </Link>
-              </Button>
-            )}
           </div>
         </section>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-            <CardDescription>Genealogy details for this person.</CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+            <div className="flex flex-col gap-1.5">
+              <CardTitle>{t("person.profileTitle")}</CardTitle>
+              <CardDescription>
+                {t("person.profileDescription")}
+              </CardDescription>
+            </div>
+            {canManage && (
+              <Button
+                asChild
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+              >
+                <Link
+                  href={`/families/${familyId}/persons/${personId}/edit`}
+                  aria-label={t("common.edit")}
+                >
+                  <Pencil className="size-4" />
+                </Link>
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="grid gap-4 text-sm md:grid-cols-2">
             <ProfileField
-              label="Gender"
-              value={person.gender ? GENDER_LABELS[person.gender] : null}
+              label={t("person.otherName")}
+              value={person.other_name}
+              notSetLabel={t("common.notSet")}
             />
-            <ProfileField label="Birth date" value={person.birth_date} />
-            <ProfileField label="Death date" value={person.death_date} />
-            <ProfileField label="Occupation" value={person.occupation} />
+            <ProfileField
+              label={t("person.gender")}
+              value={
+                person.gender ? t(`person.genderLabels.${person.gender}`) : null
+              }
+              notSetLabel={t("common.notSet")}
+            />
+            <ProfileField
+              label={t("person.birthDate")}
+              value={formatDisplayDate(person.birth_date)}
+              notSetLabel={t("common.notSet")}
+            />
+            <ProfileField
+              label={t("person.deathDate")}
+              value={formatDisplayDate(person.death_date)}
+              notSetLabel={t("common.notSet")}
+            />
+            <ProfileField
+              label={t("person.occupation")}
+              value={person.occupation}
+              notSetLabel={t("common.notSet")}
+            />
             <div className="md:col-span-2">
-              <ProfileField label="Biography" value={person.biography} multiline />
+              <ProfileField
+                label={t("person.biography")}
+                value={person.biography}
+                multiline
+                notSetLabel={t("common.notSet")}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Relationships</CardTitle>
-            <CardDescription>
-              Parents, children, spouses, and other family connections.
-            </CardDescription>
+            <CardTitle>{t("relationship.title")}</CardTitle>
+            <CardDescription>{t("relationship.description")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
             <RelationshipList
@@ -156,7 +210,9 @@ export default async function PersonDetailPage({
             />
             {canManage && (
               <div className="border-t pt-6">
-                <h3 className="mb-4 text-sm font-medium">Add relationship</h3>
+                <h3 className="mb-4 text-sm font-medium">
+                  {t("relationship.addTitle")}
+                </h3>
                 <AddRelationshipForm
                   familyId={familyId}
                   personId={personId}
@@ -173,17 +229,16 @@ export default async function PersonDetailPage({
           familyId={familyId}
           documents={personDocuments}
           canManage={canManageDocs}
-          description="Photos, certificates, and other files linked to this person."
+          description={t("person.documentsDescription")}
           uploadHref={`/families/${familyId}/documents/new?personId=${personId}`}
         />
 
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Archive</CardTitle>
+              <CardTitle>{t("person.archiveTitle")}</CardTitle>
               <CardDescription>
-                Archived persons are hidden from the default list but remain in
-                the family record.
+                {t("person.archiveDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -200,18 +255,20 @@ function ProfileField({
   label,
   value,
   multiline = false,
+  notSetLabel,
 }: {
   label: string;
   value: string | null;
   multiline?: boolean;
+  notSetLabel: string;
 }) {
   return (
     <div className="flex flex-col gap-1">
       <p className="text-muted-foreground">{label}</p>
       {multiline ? (
-        <p className="whitespace-pre-wrap">{value ?? "Not set"}</p>
+        <p className="whitespace-pre-wrap">{value ?? notSetLabel}</p>
       ) : (
-        <p className="font-medium">{value ?? "Not set"}</p>
+        <p className="font-medium">{value ?? notSetLabel}</p>
       )}
     </div>
   );

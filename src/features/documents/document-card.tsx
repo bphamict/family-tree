@@ -12,10 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DocumentDeleteButton } from "@/features/documents/document-delete-button";
-import {
-  DOCUMENT_TYPE_LABELS,
-  formatFileSize,
-} from "@/lib/document/constants";
+import { formatFileSize } from "@/lib/document/constants";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { Document } from "@/types/document";
 
 type DocumentCardProps = {
@@ -24,11 +22,13 @@ type DocumentCardProps = {
   canManage: boolean;
 };
 
-export function DocumentCard({
+export async function DocumentCard({
   familyId,
   document,
   canManage,
 }: DocumentCardProps) {
+  const t = await getTranslations();
+
   return (
     <Card className="overflow-hidden">
       <div className="bg-muted relative flex aspect-[4/3] items-center justify-center">
@@ -52,11 +52,15 @@ export function DocumentCard({
       <CardHeader className="gap-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-base">{document.title}</CardTitle>
-            <CardDescription>{formatFileSize(document.file_size)}</CardDescription>
+            <CardTitle className="truncate text-base">
+              {document.title}
+            </CardTitle>
+            <CardDescription>
+              {formatFileSize(document.file_size)}
+            </CardDescription>
           </div>
           <Badge variant="secondary">
-            {DOCUMENT_TYPE_LABELS[document.document_type]}
+            {t(`document.types.${document.document_type}`)}
           </Badge>
         </div>
       </CardHeader>
@@ -74,7 +78,7 @@ export function DocumentCard({
               href={`/families/${familyId}/persons/${document.person_id}`}
               className="text-primary hover:underline"
             >
-              View person
+              {t("common.viewPerson")}
             </Link>
           )}
           {document.event_id && (
@@ -82,15 +86,19 @@ export function DocumentCard({
               href={`/families/${familyId}/events/${document.event_id}/edit`}
               className="text-primary hover:underline"
             >
-              View event
+              {t("common.viewEvent")}
             </Link>
           )}
         </div>
 
         <div className="flex flex-wrap gap-2">
           <Button asChild size="sm" variant="outline">
-            <a href={document.file_url} target="_blank" rel="noopener noreferrer">
-              Open file
+            <a
+              href={document.file_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("common.openFile")}
             </a>
           </Button>
           {canManage && (

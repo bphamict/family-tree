@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -17,17 +17,26 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  forgotPasswordSchema,
+  createForgotPasswordSchema,
   type ForgotPasswordInput,
 } from "@/features/auth/auth-schemas";
 import { sendPasswordResetEmail } from "@/features/auth/auth-service";
+import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function ForgotPasswordForm() {
+  const t = useTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
+  const validationMessages = useMemo(() => getAuthValidationMessages(t), [t]);
+  const schema = useMemo(
+    () => createForgotPasswordSchema(validationMessages),
+    [validationMessages],
+  );
+
   const form = useForm<ForgotPasswordInput>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       email: "",
     },
@@ -45,7 +54,7 @@ export function ForgotPasswordForm() {
     }
 
     setEmailSent(true);
-    toast.success("Password reset email sent");
+    toast.success(t("auth.resetEmailSentToast"));
     setIsSubmitting(false);
   }
 
@@ -53,11 +62,13 @@ export function ForgotPasswordForm() {
     return (
       <div className="flex flex-col gap-4 text-center">
         <p className="text-muted-foreground text-sm">
-          If an account exists for that email, you will receive a password reset
-          link shortly.
+          {t("auth.resetEmailSent")}
         </p>
-        <Link href="/login" className="text-foreground text-sm font-medium hover:underline">
-          Back to sign in
+        <Link
+          href="/login"
+          className="text-foreground text-sm font-medium hover:underline"
+        >
+          {t("common.backToSignIn")}
         </Link>
       </div>
     );
@@ -65,18 +76,21 @@ export function ForgotPasswordForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("common.email")}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -86,13 +100,16 @@ export function ForgotPasswordForm() {
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Sending..." : "Send reset link"}
+          {isSubmitting ? t("common.sending") : t("auth.sendResetLink")}
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">
-          Remember your password?{" "}
-          <Link href="/login" className="text-foreground font-medium hover:underline">
-            Sign in
+          {t("auth.rememberPassword")}{" "}
+          <Link
+            href="/login"
+            className="text-foreground font-medium hover:underline"
+          >
+            {t("common.signIn")}
           </Link>
         </p>
       </form>

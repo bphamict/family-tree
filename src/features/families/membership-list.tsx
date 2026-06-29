@@ -16,7 +16,9 @@ import {
   removeMemberAction,
   updateMemberRoleAction,
 } from "@/features/families/family-actions";
-import { INVITABLE_ROLES, ROLE_LABELS } from "@/lib/family/constants";
+import { formatDisplayDate } from "@/lib/date/format";
+import { INVITABLE_ROLES } from "@/lib/family/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { InvitableRole, MembershipWithProfile } from "@/types/family";
 
 type MembershipListProps = {
@@ -32,6 +34,7 @@ export function MembershipList({
   currentUserId,
   canManage,
 }: MembershipListProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleRemove(membershipId: string) {
@@ -66,7 +69,7 @@ export function MembershipList({
 
   if (members.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">No members found.</p>
+      <p className="text-muted-foreground text-sm">{t("family.noMembers")}</p>
     );
   }
 
@@ -86,10 +89,12 @@ export function MembershipList({
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <p className="font-medium">{displayName}</p>
-                {isSelf && <Badge variant="secondary">You</Badge>}
+                {isSelf && <Badge variant="secondary">{t("common.you")}</Badge>}
               </div>
               <p className="text-muted-foreground text-sm">
-                Joined {new Date(member.created_at).toLocaleDateString()}
+                {t("common.joined", {
+                  date: formatDisplayDate(member.created_at) ?? "",
+                })}
               </p>
             </div>
 
@@ -108,13 +113,15 @@ export function MembershipList({
                   <SelectContent>
                     {INVITABLE_ROLES.map((role) => (
                       <SelectItem key={role} value={role}>
-                        {ROLE_LABELS[role]}
+                        {t(`family.roles.${role}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <Badge variant="outline">{ROLE_LABELS[member.role]}</Badge>
+                <Badge variant="outline">
+                  {t(`family.roles.${member.role}`)}
+                </Badge>
               )}
 
               {canManage && !isOwner && !isSelf && (
@@ -125,7 +132,7 @@ export function MembershipList({
                   onClick={() => handleRemove(member.id)}
                   disabled={isPending}
                 >
-                  Remove
+                  {t("common.remove")}
                 </Button>
               )}
             </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 import { MembershipList } from "@/features/families/membership-list";
 import { requireUser } from "@/lib/auth/require-user";
 import { canInviteMembers, canManageMembers } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 
 type FamilyMembersPageProps = {
   params: Promise<{ familyId: string }>;
@@ -28,6 +30,7 @@ type FamilyMembersPageProps = {
 export default async function FamilyMembersPage({
   params,
 }: FamilyMembersPageProps) {
+  const t = await getTranslations();
   const user = await requireUser();
   const { familyId } = await params;
   const family = await getFamilyById(familyId);
@@ -53,24 +56,27 @@ export default async function FamilyMembersPage({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-semibold tracking-tight">
-                {family.name} members
+                {t("person.membersHeading", { familyName: family.name })}
               </h1>
               <p className="text-muted-foreground">
-                Manage who has access to this family.
+                {t("family.membersDescription")}
               </p>
             </div>
-            <Button asChild variant="outline">
-              <Link href={`/families/${familyId}`}>Back to family</Link>
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}`}
+                aria-label={t("common.backToFamily")}
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
             </Button>
           </div>
         </section>
 
         <Card>
           <CardHeader>
-            <CardTitle>Members</CardTitle>
-            <CardDescription>
-              People who currently have access to this family.
-            </CardDescription>
+            <CardTitle>{t("family.membersTitle")}</CardTitle>
+            <CardDescription>{t("family.membersDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <MembershipList
@@ -86,10 +92,8 @@ export default async function FamilyMembersPage({
           <>
             <Card>
               <CardHeader>
-                <CardTitle>Invite member</CardTitle>
-                <CardDescription>
-                  Send an email invitation to join this family.
-                </CardDescription>
+                <CardTitle>{t("family.inviteEmail")}</CardTitle>
+                <CardDescription>{t("family.sendInvitation")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <InviteMemberForm familyId={familyId} />
@@ -98,10 +102,7 @@ export default async function FamilyMembersPage({
 
             <Card>
               <CardHeader>
-                <CardTitle>Pending invitations</CardTitle>
-                <CardDescription>
-                  Invitations that have not been accepted yet.
-                </CardDescription>
+                <CardTitle>{t("family.pendingInvitations")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <InvitationList

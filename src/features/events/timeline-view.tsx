@@ -1,4 +1,5 @@
 import { EventCard } from "@/features/events/event-card";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { EventWithParticipants } from "@/types/event";
 
 type TimelineViewProps = {
@@ -30,19 +31,18 @@ function groupEventsByYear(events: EventWithParticipants[]): TimelineGroup[] {
     }));
 }
 
-export function TimelineView({
+export async function TimelineView({
   familyId,
   events,
   canManage,
 }: TimelineViewProps) {
+  const t = await getTranslations();
   const groups = groupEventsByYear(events);
 
   if (groups.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-muted-foreground">
-          No events match your filters yet.
-        </p>
+        <p className="text-muted-foreground">{t("event.noEvents")}</p>
       </div>
     );
   }

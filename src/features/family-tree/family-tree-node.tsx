@@ -3,9 +3,11 @@
 import Link from "next/link";
 
 import { PersonAvatar } from "@/components/shared/person-avatar";
-import { Badge } from "@/components/ui/badge";
+import { GenderIcon } from "@/components/shared/gender-icon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatLifespan } from "@/lib/date/format";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import { formatPersonName } from "@/types/person";
 import type { TreeLayoutNode } from "@/types/tree";
 import { TREE_NODE_HEIGHT, TREE_NODE_WIDTH } from "@/types/tree";
@@ -21,12 +23,13 @@ export function FamilyTreeNodeCard({
   familyId,
   onSetRoot,
 }: FamilyTreeNodeProps) {
+  const t = useTranslations();
   const { person, x, y, isRoot } = node;
   const lifespan = formatLifespan(person.birth_date, person.death_date);
 
   return (
     <div
-      className="absolute"
+      className="absolute z-10"
       style={{
         left: x,
         top: y,
@@ -36,59 +39,66 @@ export function FamilyTreeNodeCard({
     >
       <div
         className={cn(
-          "bg-card flex h-full flex-col gap-2 rounded-xl border p-3 shadow-sm",
+          "bg-card hover:border-primary/60 flex h-full flex-col items-center gap-1 overflow-hidden rounded-xl border p-2 shadow-sm transition-colors",
+          isRoot ? "justify-start" : "justify-between",
           isRoot && "ring-primary ring-2",
         )}
       >
-        <div className="flex items-start gap-2">
-          <PersonAvatar person={person} size="sm" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              <p className="truncate text-sm font-semibold">
-                {formatPersonName(person)}
+        <div className="flex w-full flex-col items-center gap-1">
+          <Link
+            href={`/families/${familyId}/persons/${person.id}`}
+            className="focus-visible:ring-ring focus-visible:ring-offset-background relative shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            data-no-pan
+            onPointerDown={(event) => event.stopPropagation()}
+            aria-label={t("common.viewProfile")}
+          >
+            <PersonAvatar person={person} size="sm" />
+            {person.gender && (
+              <span className="bg-card absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full border shadow-sm">
+                <GenderIcon
+                  gender={person.gender}
+                  label={t(`person.genderLabels.${person.gender}`)}
+                  iconClassName="size-3"
+                />
+              </span>
+            )}
+          </Link>
+
+          <div className="flex w-full min-w-0 flex-col gap-0.5 px-0.5 text-center">
+            <p className="w-full text-xs leading-snug font-semibold break-words">
+              {formatPersonName(person)}
+            </p>
+            {person.other_name && (
+              <p className="text-muted-foreground w-full truncate text-[10px] leading-tight italic">
+                ({person.other_name})
               </p>
-              {isRoot && <Badge variant="secondary">Root</Badge>}
-            </div>
+            )}
             {lifespan && (
-              <p className="text-muted-foreground truncate text-xs">{lifespan}</p>
+              <p className="text-muted-foreground text-[10px] leading-tight">
+                {lifespan}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="mt-auto flex flex-wrap gap-1">
-          <Button asChild variant="outline" size="sm" className="h-7 px-2 text-xs">
-            <Link href={`/families/${familyId}/persons/${person.id}`}>
-              Profile
-            </Link>
-          </Button>
-          {!isRoot && (
+        {!isRoot && (
+          <div
+            className="flex w-full shrink-0 flex-col"
+            data-no-pan
+            onPointerDown={(event) => event.stopPropagation()}
+          >
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs"
+              className="h-6 w-full px-1 text-[10px]"
               onClick={() => onSetRoot(person.id)}
             >
-              Set root
+              {t("tree.setRoot")}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
-
-function formatLifespan(
-  birthDate: string | null,
-  deathDate: string | null,
-): string | null {
-  if (!birthDate && !deathDate) {
-    return null;
-  }
-
-  if (birthDate && deathDate) {
-    return `${birthDate} – ${deathDate}`;
-  }
-
-  return birthDate ?? deathDate;
 }

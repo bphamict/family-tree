@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Button } from "@/components/ui/button";
@@ -9,10 +10,8 @@ import { EventFilterForm } from "@/features/events/event-filter-form";
 import { getEventsByFamily } from "@/features/events/event-service";
 import { TimelineView } from "@/features/events/timeline-view";
 import { getFamilyById } from "@/features/families/family-service";
-import {
-  canManageEvents,
-  canViewEvents,
-} from "@/lib/family/permissions";
+import { canManageEvents, canViewEvents } from "@/lib/family/permissions";
+import { getTranslations } from "@/lib/i18n/translator";
 import type { EventSearchFilters, EventType } from "@/types/event";
 
 type TimelinePageProps = {
@@ -20,9 +19,10 @@ type TimelinePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const metadata: Metadata = {
-  title: "Family timeline",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t("event.timelineTitle") };
+}
 
 function parseSearchFilters(
   searchParams: Record<string, string | string[] | undefined>,
@@ -44,6 +44,7 @@ export default async function TimelinePage({
   params,
   searchParams,
 }: TimelinePageProps) {
+  const t = await getTranslations();
   const { familyId } = await params;
   const resolvedSearchParams = await searchParams;
   const family = await getFamilyById(familyId);
@@ -64,24 +65,31 @@ export default async function TimelinePage({
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
-              {family.name} timeline
+              {t("event.timelineHeading", { familyName: family.name })}
             </h1>
             <p className="text-muted-foreground">
-              {events.length} event{events.length === 1 ? "" : "s"} in
-              chronological order
+              {t("event.timelineDescription", { count: events.length })}
             </p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link href={`/families/${familyId}`}>Back to family</Link>
-            </Button>
             {canManage && (
-              <Button asChild>
-                <Link href={`/families/${familyId}/events/new`}>
-                  Add event
+              <Button asChild size="icon">
+                <Link
+                  href={`/families/${familyId}/events/new`}
+                  aria-label={t("family.addEvent")}
+                >
+                  <Plus className="size-4" />
                 </Link>
               </Button>
             )}
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}`}
+                aria-label={t("common.backToFamily")}
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
+            </Button>
           </div>
         </section>
 

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { deleteEventAction } from "@/features/events/event-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 type EventDeleteButtonProps = {
   familyId: string;
@@ -15,11 +16,12 @@ export function EventDeleteButton({
   familyId,
   eventId,
 }: EventDeleteButtonProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
     const confirmed = window.confirm(
-      "Delete this event? This action cannot be undone.",
+      t("event.deleteConfirm", { confirm: t("common.confirmDelete") }),
     );
 
     if (!confirmed) {
@@ -42,7 +44,7 @@ export function EventDeleteButton({
       onClick={handleDelete}
       disabled={isPending}
     >
-      {isPending ? "Deleting..." : "Delete event"}
+      {isPending ? t("common.deleting") : t("event.deleteEvent")}
     </Button>
   );
 }

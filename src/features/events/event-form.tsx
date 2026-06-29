@@ -19,7 +19,8 @@ import {
   updateEventAction,
 } from "@/features/events/event-actions";
 import { ParticipantSelect } from "@/features/events/participant-select";
-import { EVENT_TYPE_LABELS, EVENT_TYPES } from "@/lib/event/constants";
+import { EVENT_TYPES } from "@/lib/event/constants";
+import { useTranslations } from "@/lib/i18n/use-translator";
 import type { EventType, EventWithParticipants } from "@/types/event";
 import type { Person } from "@/types/person";
 
@@ -31,6 +32,7 @@ type EventFormProps = {
 };
 
 export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [eventType, setEventType] = useState<EventType>(
     event?.event_type ?? "other",
@@ -59,7 +61,7 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title">{t("common.title")}</Label>
         <Input
           id="title"
           name="title"
@@ -71,19 +73,19 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="eventType">Event type</Label>
+          <Label htmlFor="eventType">{t("event.eventType")}</Label>
           <Select
             value={eventType}
             onValueChange={(value) => setEventType(value as EventType)}
             disabled={isPending}
           >
             <SelectTrigger id="eventType">
-              <SelectValue placeholder="Select event type" />
+              <SelectValue placeholder={t("event.selectEventType")} />
             </SelectTrigger>
             <SelectContent>
               {EVENT_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {EVENT_TYPE_LABELS[type]}
+                  {t(`event.types.${type}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -91,7 +93,7 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="eventDate">Event date</Label>
+          <Label htmlFor="eventDate">{t("event.eventDate")}</Label>
           <Input
             id="eventDate"
             name="eventDate"
@@ -104,7 +106,7 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location">{t("common.location")}</Label>
         <Input
           id="location"
           name="location"
@@ -114,7 +116,7 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("common.description")}</Label>
         <Textarea
           id="description"
           name="description"
@@ -126,18 +128,20 @@ export function EventForm({ familyId, persons, event, mode }: EventFormProps) {
 
       <ParticipantSelect
         persons={persons}
-        selectedIds={event?.participants.map((participant) => participant.person_id) ?? []}
+        selectedIds={
+          event?.participants.map((participant) => participant.person_id) ?? []
+        }
         disabled={isPending}
       />
 
       <Button type="submit" disabled={isPending}>
         {isPending
           ? mode === "create"
-            ? "Creating..."
-            : "Saving..."
+            ? t("common.creating")
+            : t("common.saving")
           : mode === "create"
-            ? "Create event"
-            : "Save changes"}
+            ? t("event.createEvent")
+            : t("common.save")}
       </Button>
     </form>
   );

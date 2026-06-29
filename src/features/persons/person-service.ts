@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Person, PersonSearchFilters } from "@/types/person";
 
 const PERSON_SELECT =
-  "id, family_id, branch_id, first_name, middle_name, last_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at";
+  "id, family_id, branch_id, first_name, middle_name, last_name, other_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at";
 
 function mapPerson(row: {
   id: string;
@@ -11,6 +11,7 @@ function mapPerson(row: {
   first_name: string;
   middle_name: string | null;
   last_name: string;
+  other_name: string | null;
   gender: string | null;
   birth_date: string | null;
   death_date: string | null;
@@ -67,7 +68,7 @@ export async function getPersonsByFamily(
   if (filters.query) {
     const search = `%${filters.query}%`;
     query = query.or(
-      `first_name.ilike.${search},middle_name.ilike.${search},last_name.ilike.${search}`,
+      `first_name.ilike.${search},middle_name.ilike.${search},last_name.ilike.${search},other_name.ilike.${search}`,
     );
   }
 

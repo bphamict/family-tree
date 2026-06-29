@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createFamilyAction } from "@/features/families/family-actions";
+import { useTranslations } from "@/lib/i18n/use-translator";
 
 export function CreateFamilyForm() {
+  const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -25,28 +27,28 @@ export function CreateFamilyForm() {
   return (
     <form action={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="name">Family name</Label>
+        <Label htmlFor="name">{t("family.familyName")}</Label>
         <Input
           id="name"
           name="name"
-          placeholder="Nguyen Family"
+          placeholder={t("family.familyNamePlaceholder")}
           required
           disabled={isPending}
         />
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="description">Description (optional)</Label>
+        <Label htmlFor="description">{t("common.description")}</Label>
         <Textarea
           id="description"
           name="description"
-          placeholder="A short description of this family..."
+          placeholder={t("family.descriptionPlaceholder")}
           disabled={isPending}
         />
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Creating..." : "Create family"}
+        {isPending ? t("common.creating") : t("family.createFamily")}
       </Button>
     </form>
   );

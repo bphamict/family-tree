@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 import { formatPersonName, type Person } from "@/types/person";
 
 type PersonAvatarProps = {
-  person: Pick<Person, "first_name" | "middle_name" | "last_name" | "avatar_url">;
+  person: Pick<
+    Person,
+    "first_name" | "middle_name" | "last_name" | "avatar_url"
+  >;
   size?: "sm" | "md" | "lg";
   className?: string;
 };
@@ -26,7 +29,8 @@ export function PersonAvatar({
   size = "md",
   className,
 }: PersonAvatarProps) {
-  const initials = `${person.first_name.charAt(0)}${person.last_name.charAt(0)}`.toUpperCase();
+  const initials =
+    `${person.first_name.charAt(0)}${person.last_name.charAt(0)}`.toUpperCase();
   const name = formatPersonName(person);
 
   if (person.avatar_url) {
