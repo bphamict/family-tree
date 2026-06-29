@@ -1,0 +1,153 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPES } from "@/lib/document/constants";
+import type { DocumentSearchFilters, DocumentType } from "@/types/document";
+import { formatPersonName, type Person } from "@/types/person";
+import type { Event } from "@/types/event";
+
+type DocumentFilterFormProps = {
+  filters: DocumentSearchFilters;
+  persons: Person[];
+  events: Event[];
+};
+
+export function DocumentFilterForm({
+  filters,
+  persons,
+  events,
+}: DocumentFilterFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  function updateFilters(next: Partial<DocumentSearchFilters>) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    for (const [key, value] of Object.entries(next)) {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+
+    startTransition(() => {
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "?");
+    });
+  }
+
+  const hasFilters = Boolean(
+    filters.documentType || filters.personId || filters.eventId,
+  );
+
+  return (
+    <div className="grid gap-4 rounded-lg border p-4 md:grid-cols-4">
+      <div className="grid gap-2">
+        <Label htmlFor="documentType">Type</Label>
+        <Select
+          value={filters.documentType ?? "all"}
+          onValueChange={(value) =>
+            updateFilters({
+              documentType: value === "all" ? undefined : (value as DocumentType),
+            })
+          }
+          disabled={isPending}
+        >
+          <SelectTrigger id="documentType">
+            <SelectValue placeholder="All types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            {DOCUMENT_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {DOCUMENT_TYPE_LABELS[type]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="personId">Person</Label>
+        <Select
+          value={filters.personId ?? "all"}
+          onValueChange={(value) =>
+            updateFilters({
+              personId: value === "all" ? undefined : value,
+            })
+          }
+          disabled={isPending}
+        >
+          <SelectTrigger id="personId">
+            <SelectValue placeholder="All persons" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All persons</SelectItem>
+            {persons.map((person) => (
+              <SelectItem key={person.id} value={person.id}>
+                {formatPersonName(person)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="eventId">Event</Label>
+        <Select
+          value={filters.eventId ?? "all"}
+          onValueChange={(value) =>
+            updateFilters({
+              eventId: value === "all" ? undefined : value,
+            })
+          }
+          disabled={isPending}
+        >
+          <SelectTrigger id="eventId">
+            <SelectValue placeholder="All events" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All events</SelectItem>
+            {events.map((event) => (
+              <SelectItem key={event.id} value={event.id}>
+                {event.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-end">
+        {hasFilters && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending}
+            onClick={() =>
+              updateFilters({
+                documentType: undefined,
+                personId: undefined,
+                eventId: undefined,
+              })
+            }
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}

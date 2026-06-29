@@ -1,0 +1,77 @@
+"use client";
+
+import { useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { formatPersonName, type Person } from "@/types/person";
+
+type ParticipantSelectProps = {
+  persons: Person[];
+  selectedIds: string[];
+  disabled?: boolean;
+};
+
+export function ParticipantSelect({
+  persons,
+  selectedIds,
+  disabled = false,
+}: ParticipantSelectProps) {
+  const [query, setQuery] = useState("");
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredPersons = persons.filter((person) => {
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return formatPersonName(person).toLowerCase().includes(normalizedQuery);
+  });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid gap-2">
+        <Label htmlFor="participantSearch">Participants</Label>
+        <Input
+          id="participantSearch"
+          placeholder="Search family members..."
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          disabled={disabled}
+        />
+      </div>
+
+      {persons.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          Add family members before linking them to events.
+        </p>
+      ) : (
+        <div className="max-h-56 overflow-y-auto rounded-md border p-3">
+          <div className="flex flex-col gap-2">
+            {filteredPersons.map((person) => (
+              <label
+                key={person.id}
+                className="flex cursor-pointer items-center gap-2 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  name="participantIds"
+                  value={person.id}
+                  defaultChecked={selectedIds.includes(person.id)}
+                  disabled={disabled}
+                  className="size-4 rounded border"
+                />
+                <span>{formatPersonName(person)}</span>
+              </label>
+            ))}
+            {filteredPersons.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                No members match your search.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,2 @@
+-- Seed data for local development (optional).
+-- Profiles are created automatically via auth signup trigger.
