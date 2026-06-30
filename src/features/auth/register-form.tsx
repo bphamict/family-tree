@@ -22,6 +22,7 @@ import {
   type RegisterInput,
 } from "@/features/auth/auth-schemas";
 import { signUpWithEmail } from "@/features/auth/auth-service";
+import { AUTHENTICATED_HOME } from "@/lib/auth/routes";
 import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
 import { useTranslations } from "@/lib/i18n/use-translator";
 
@@ -59,7 +60,7 @@ export function RegisterForm() {
 
     if (data.session) {
       toast.success(t("auth.accountCreated"));
-      router.push("/dashboard");
+      router.push(AUTHENTICATED_HOME);
       router.refresh();
       return;
     }

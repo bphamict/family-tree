@@ -7,7 +7,9 @@ export const AUTH_ROUTES = [
 
 export const AUTH_ROUTES_ALLOW_AUTHENTICATED = ["/reset-password"] as const;
 
-export const PROTECTED_ROUTE_PREFIXES = ["/dashboard", "/families"] as const;
+export const AUTHENTICATED_HOME = "/families";
+
+export const PROTECTED_ROUTE_PREFIXES = ["/families"] as const;
 
 export function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some(

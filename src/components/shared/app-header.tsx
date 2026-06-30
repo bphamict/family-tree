@@ -2,16 +2,26 @@ import Link from "next/link";
 import { Network } from "lucide-react";
 
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
-import { AppDesktopNav, AppMobileNav } from "@/components/shared/app-nav";
+import { AppMobileNav } from "@/components/shared/app-nav";
 import { ThemeSwitcher } from "@/components/shared/theme-switcher";
+import { UserMenu } from "@/components/shared/user-menu";
 import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/features/auth/sign-out-button";
+import { getProfileByUserId } from "@/features/auth/profile-service";
 import { getUser } from "@/lib/auth/get-user";
 import { getTranslations } from "@/lib/i18n/translator";
 
 export async function AppHeader() {
   const t = await getTranslations();
   const user = await getUser();
+  const profile = user ? await getProfileByUserId(user.id) : null;
+
+  const userMenuProps = user
+    ? {
+        fullName: profile?.full_name ?? null,
+        email: user.email ?? null,
+        avatarUrl: profile?.avatar_url ?? null,
+      }
+    : null;
 
   return (
     <header className="border-b">
@@ -24,11 +34,14 @@ export async function AppHeader() {
         <nav className="flex items-center gap-2">
           {user ? (
             <>
-              <AppDesktopNav />
               <LocaleSwitcher />
               <ThemeSwitcher />
-              <SignOutButton className="hidden md:inline-flex" />
               <AppMobileNav />
+              {userMenuProps ? (
+                <div className="hidden md:block">
+                  <UserMenu {...userMenuProps} />
+                </div>
+              ) : null}
             </>
           ) : (
             <>

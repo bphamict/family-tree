@@ -68,9 +68,9 @@ export const vi: Messages = {
     eventCount: "{count} sự kiện",
     documentCount: "{count} tài liệu",
     familyCount: "Tổng cộng {count} gia đình",
-    dashboard: "Bảng điều khiển",
     families: "Gia đình",
     menu: "Menu",
+    accountMenu: "Menu tài khoản",
     signIn: "Đăng nhập",
     signOut: "Đăng xuất",
     signingOut: "Đang đăng xuất...",
@@ -84,30 +84,34 @@ export const vi: Messages = {
     lightMode: "Sáng",
     darkMode: "Tối",
     systemTheme: "Hệ thống",
-    supabase: "Supabase",
-    connected: "Đã kết nối",
-    connectionFailed: "Kết nối thất bại",
-    notConfigured: "Chưa cấu hình",
-    supabaseNotConfigured: "Biến môi trường Supabase chưa được cấu hình.",
-    supabaseConnected: "Đã kết nối Supabase.",
-    unknownConnectionError: "Lỗi kết nối không xác định.",
   },
-  home: {
-    title: "Hệ thống quản lý gia phả",
+  landing: {
+    title: "Lưu giữ câu chuyện gia đình qua nhiều thế hệ",
     subtitle:
-      "Lưu giữ, quản lý và trực quan hóa gia phả. Cộng tác an toàn với phân quyền theo vai trò trên nhiều gia đình.",
-    goToDashboard: "Đến bảng điều khiển",
-    getStarted: "Bắt đầu",
-    projectStatus: "Trạng thái dự án",
-    phaseStatus:
-      "Giai đoạn 8 — kho lưu trữ tài liệu và phương tiện đã sẵn sàng.",
-    gettingStarted: "Bắt đầu",
-    gettingStartedDescription: "Tạo tài khoản để bắt đầu quản lý gia phả.",
-    stepEnv: "Sao chép .env.example thành .env.local",
-    stepDb: "Chạy pnpm db:start để khởi động Supabase cục bộ",
-    stepRegister: "Tạo tài khoản",
-    stepSignIn: "đăng nhập",
-    or: "hoặc",
+      "Xây dựng cây gia phả tương tác, ghi nhận quan hệ và sự kiện, lưu trữ ảnh tài liệu, và tra cứu danh xưng — tất cả trong một nền tảng.",
+    viewFamilies: "Xem gia đình của bạn",
+    getStarted: "Bắt đầu miễn phí",
+    featuresTitle: "Thiết kế cho gia phả thực tế",
+    featuresDescription:
+      "Từ quan hệ hàng ngày đến danh xưng theo văn hóa, mọi thứ được sắp xếp gọn gàng và dễ chia sẻ với người thân.",
+    featureTreeTitle: "Cây gia phả tương tác",
+    featureTreeDescription:
+      "Khám phá tổ tiên, con cháu và vợ chồng với cây có thể kéo, phóng to và đặt trọng tâm vào bất kỳ thành viên nào.",
+    featureMembersTitle: "Hồ sơ thành viên",
+    featureMembersDescription:
+      "Lưu tên, ngày sinh, ảnh đại diện và quan hệ cho từng người trong gia đình.",
+    featureTimelineTitle: "Dòng thời gian",
+    featureTimelineDescription:
+      "Ghi lại sinh nhật, cưới hỏi, giỗ chạp, họp mặt và các cột mốc theo thứ tự thời gian.",
+    featureDocumentsTitle: "Kho lưu trữ",
+    featureDocumentsDescription:
+      "Tải lên ảnh, giấy tờ và tài liệu gia đình, liên kết với thành viên và sự kiện.",
+    featureKinshipTitle: "Tra cứu danh xưng",
+    featureKinshipDescription:
+      "Tìm cách xưng hô giữa các thành viên dựa trên quan hệ và thứ tự sinh đã ghi nhận.",
+    ctaTitle: "Bắt đầu cây gia phả hôm nay",
+    ctaDescription:
+      "Tạo tài khoản miễn phí, thêm gia đình đầu tiên và mời người thân cùng tham gia.",
   },
   auth: {
     signInTitle: "Đăng nhập",
@@ -153,6 +157,28 @@ export const vi: Messages = {
       nameMin: "Họ và tên phải có ít nhất 2 ký tự",
       confirmPassword: "Xác nhận mật khẩu",
       passwordsMismatch: "Mật khẩu không khớp",
+    },
+  },
+  profile: {
+    title: "Hồ sơ",
+    description: "Cập nhật tên và ảnh đại diện tài khoản của bạn.",
+    formTitle: "Thông tin tài khoản",
+    formDescription:
+      "Tên của bạn hiển thị với các thành viên khác trong gia đình.",
+    emailReadOnly:
+      "Email được quản lý qua nhà cung cấp đăng nhập và không thể thay đổi tại đây.",
+    avatarTitle: "Ảnh đại diện",
+    avatarDescription: "Tải ảnh cho tài khoản của bạn.",
+    uploadAvatar: "Tải ảnh",
+    uploadImage: "Tải lên",
+    toast: {
+      updated: "Cập nhật hồ sơ thành công.",
+      avatarUploaded: "Tải ảnh đại diện thành công.",
+    },
+    errors: {
+      notFound: "Không tìm thấy hồ sơ.",
+      update: "Không thể cập nhật hồ sơ.",
+      selectImage: "Chọn ảnh để tải lên.",
     },
   },
   family: {

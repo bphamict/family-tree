@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Menu, UsersRound } from "lucide-react";
+import { LogOut, Menu, User, UsersRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,26 +15,29 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SignOutButton } from "@/features/auth/sign-out-button";
+import { signOut } from "@/features/auth/auth-service";
 import { useTranslations } from "@/lib/i18n/use-translator";
-
-export function AppDesktopNav() {
-  const t = useTranslations();
-
-  return (
-    <div className="hidden items-center gap-2 md:flex">
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/dashboard">{t("common.dashboard")}</Link>
-      </Button>
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/families">{t("common.families")}</Link>
-      </Button>
-    </div>
-  );
-}
 
 export function AppMobileNav() {
   const t = useTranslations();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+
+    const { error } = await signOut();
+
+    if (error) {
+      toast.error(error.message);
+      setIsSigningOut(false);
+      return;
+    }
+
+    toast.success(t("auth.signedOut"));
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <Sheet>
@@ -52,21 +58,31 @@ export function AppMobileNav() {
         <nav className="flex flex-col gap-1 px-4">
           <SheetClose asChild>
             <Button asChild variant="ghost" className="justify-start">
-              <Link href="/dashboard">
-                <LayoutDashboard />
-                {t("common.dashboard")}
+              <Link href="/families">
+                <UsersRound className="size-4" aria-hidden />
+                {t("common.families")}
               </Link>
             </Button>
           </SheetClose>
           <SheetClose asChild>
             <Button asChild variant="ghost" className="justify-start">
-              <Link href="/families">
-                <UsersRound />
-                {t("common.families")}
+              <Link href="/profile">
+                <User className="size-4" aria-hidden />
+                {t("profile.title")}
               </Link>
             </Button>
           </SheetClose>
-          <SignOutButton showLabel className="w-full justify-start" />
+          <Button
+            variant="ghost"
+            className="text-destructive hover:text-destructive justify-start"
+            disabled={isSigningOut}
+            onClick={() => {
+              void handleSignOut();
+            }}
+          >
+            <LogOut className="size-4" aria-hidden />
+            {isSigningOut ? t("common.signingOut") : t("common.signOut")}
+          </Button>
         </nav>
       </SheetContent>
     </Sheet>

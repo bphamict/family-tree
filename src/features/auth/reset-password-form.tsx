@@ -22,6 +22,7 @@ import {
   type ResetPasswordInput,
 } from "@/features/auth/auth-schemas";
 import { updatePassword } from "@/features/auth/auth-service";
+import { AUTHENTICATED_HOME } from "@/lib/auth/routes";
 import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
 import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "@/lib/i18n/use-translator";
@@ -71,7 +72,7 @@ export function ResetPasswordForm() {
     }
 
     toast.success(t("auth.passwordUpdated"));
-    router.push("/dashboard");
+    router.push(AUTHENTICATED_HOME);
     router.refresh();
   }
 

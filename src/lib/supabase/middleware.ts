@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
+  AUTHENTICATED_HOME,
   isProtectedRoute,
   shouldRedirectAuthenticatedFromAuthRoute,
 } from "@/lib/auth/routes";
@@ -17,6 +18,13 @@ export async function updateSession(
 
   const env = getPublicEnv();
   const pathname = request.nextUrl.pathname;
+
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = AUTHENTICATED_HOME;
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
 
   const supabase = createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
@@ -56,7 +64,7 @@ export async function updateSession(
 
   if (user && shouldRedirectAuthenticatedFromAuthRoute(pathname)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    redirectUrl.pathname = AUTHENTICATED_HOME;
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

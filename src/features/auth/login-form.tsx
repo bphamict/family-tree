@@ -22,6 +22,7 @@ import {
   type LoginInput,
 } from "@/features/auth/auth-schemas";
 import { signInWithEmail } from "@/features/auth/auth-service";
+import { AUTHENTICATED_HOME } from "@/lib/auth/routes";
 import { getAuthValidationMessages } from "@/lib/i18n/validation-messages";
 import { useTranslations } from "@/lib/i18n/use-translator";
 
@@ -30,7 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+  const redirectTo = searchParams.get("redirect") ?? AUTHENTICATED_HOME;
 
   const validationMessages = useMemo(() => getAuthValidationMessages(t), [t]);
   const schema = useMemo(

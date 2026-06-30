@@ -66,9 +66,9 @@ export const en = {
     eventCount: "{count} event(s)",
     documentCount: "{count} document(s)",
     familyCount: "{count} family/families total",
-    dashboard: "Dashboard",
     families: "Families",
     menu: "Menu",
+    accountMenu: "Account menu",
     signIn: "Sign in",
     signOut: "Sign out",
     signingOut: "Signing out...",
@@ -82,30 +82,34 @@ export const en = {
     lightMode: "Light",
     darkMode: "Dark",
     systemTheme: "System",
-    supabase: "Supabase",
-    connected: "Connected",
-    connectionFailed: "Connection failed",
-    notConfigured: "Not configured",
-    supabaseNotConfigured: "Supabase environment variables are not configured.",
-    supabaseConnected: "Connected to Supabase.",
-    unknownConnectionError: "Unknown connection error.",
   },
-  home: {
-    title: "Family Tree Management System",
+  landing: {
+    title: "Preserve your family story for generations",
     subtitle:
-      "Preserve, manage, and visualize your family genealogy. Collaborate securely with role-based access across multiple families.",
-    goToDashboard: "Go to dashboard",
-    getStarted: "Get started",
-    projectStatus: "Project status",
-    phaseStatus: "Phase 8 — documents and media archive are available.",
-    gettingStarted: "Getting started",
-    gettingStartedDescription:
-      "Create an account to begin managing your family tree.",
-    stepEnv: "Copy .env.example to .env.local",
-    stepDb: "Run pnpm db:start to start Supabase locally",
-    stepRegister: "Create an account",
-    stepSignIn: "sign in",
-    or: "or",
+      "Build interactive family trees, record relationships and milestones, archive photos and documents, and look up Vietnamese kinship terms — all in one place.",
+    viewFamilies: "View your families",
+    getStarted: "Get started free",
+    featuresTitle: "Built for real family history",
+    featuresDescription:
+      "From everyday genealogy to cultural details like danh xưng, everything stays organized and easy to share with relatives.",
+    featureTreeTitle: "Interactive family tree",
+    featureTreeDescription:
+      "Explore ancestors, descendants, and spouses with a pan-and-zoom tree you can focus on any member.",
+    featureMembersTitle: "Member profiles",
+    featureMembersDescription:
+      "Store names, dates, photos, and relationships for every person in your family.",
+    featureTimelineTitle: "Family timeline",
+    featureTimelineDescription:
+      "Record births, weddings, memorials, reunions, and other milestones in chronological order.",
+    featureDocumentsTitle: "Archive & documents",
+    featureDocumentsDescription:
+      "Upload photos, certificates, and family records linked to people and events.",
+    featureKinshipTitle: "Kinship lookup",
+    featureKinshipDescription:
+      "Find how family members should address each other based on recorded relationships and birth order.",
+    ctaTitle: "Start your family tree today",
+    ctaDescription:
+      "Create a free account, add your first family, and invite relatives to collaborate.",
   },
   auth: {
     signInTitle: "Sign in",
@@ -151,6 +155,27 @@ export const en = {
       nameMin: "Full name must be at least 2 characters",
       confirmPassword: "Confirm your password",
       passwordsMismatch: "Passwords do not match",
+    },
+  },
+  profile: {
+    title: "Profile",
+    description: "Update your account name and profile photo.",
+    formTitle: "Account details",
+    formDescription: "Your name is shown to other family members.",
+    emailReadOnly:
+      "Email is managed through your sign-in provider and cannot be changed here.",
+    avatarTitle: "Profile photo",
+    avatarDescription: "Upload a photo for your account.",
+    uploadAvatar: "Upload photo",
+    uploadImage: "Upload image",
+    toast: {
+      updated: "Profile updated successfully.",
+      avatarUploaded: "Profile photo uploaded successfully.",
+    },
+    errors: {
+      notFound: "Profile not found.",
+      update: "Failed to update profile.",
+      selectImage: "Select an image to upload.",
     },
   },
   family: {

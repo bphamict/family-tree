@@ -10,10 +10,7 @@ import {
   createUpdateFamilySchema,
   updateMemberRoleSchema,
 } from "@/features/families/family-schemas";
-import {
-  getFamilyById,
-  getMembershipForUser,
-} from "@/features/families/family-service";
+import { getFamilyById } from "@/features/families/family-service";
 import { requireUser } from "@/lib/auth/require-user";
 import { ACTIVE_FAMILY_COOKIE } from "@/lib/family/constants";
 import {
@@ -68,7 +65,6 @@ export async function createFamilyAction(
     path: "/",
   });
 
-  revalidatePath("/dashboard");
   revalidatePath("/families");
   redirect(`/families/${familyId}`);
 }
@@ -112,8 +108,6 @@ export async function updateFamilyAction(
 
   revalidatePath(`/families/${familyId}`);
   revalidatePath("/families");
-  revalidatePath("/dashboard");
-
   return { success: t("family.toast.updated") };
 }
 
@@ -140,8 +134,6 @@ export async function archiveFamilyAction(
 
   revalidatePath(`/families/${familyId}`);
   revalidatePath("/families");
-  revalidatePath("/dashboard");
-
   return { success: t("family.toast.archived") };
 }
 
@@ -168,29 +160,7 @@ export async function restoreFamilyAction(
 
   revalidatePath(`/families/${familyId}`);
   revalidatePath("/families");
-  revalidatePath("/dashboard");
-
   return { success: t("family.toast.restored") };
-}
-
-export async function setActiveFamilyAction(familyId: string): Promise<void> {
-  const user = await requireUser();
-  const membership = await getMembershipForUser(familyId, user.id);
-
-  if (!membership) {
-    const t = await getTranslations();
-    throw new Error(t("errors.notAuthenticated"));
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set(ACTIVE_FAMILY_COOKIE, familyId, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  });
-
-  revalidatePath("/dashboard");
-  revalidatePath("/families");
 }
 
 export async function inviteMemberAction(
@@ -360,7 +330,6 @@ export async function acceptInvitationAction(
     path: "/",
   });
 
-  revalidatePath("/dashboard");
   revalidatePath("/families");
   redirect(`/families/${familyId}`);
 }
@@ -381,7 +350,6 @@ export async function declineInvitationAction(
     return { error: error.message };
   }
 
-  revalidatePath("/dashboard");
   revalidatePath("/families");
 
   return { success: t("family.toast.invitationDeclined") };

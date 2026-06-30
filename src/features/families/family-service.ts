@@ -1,4 +1,3 @@
-import { getActiveFamilyIdFromCookie } from "@/lib/family/active-family-cookie";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Family,
@@ -88,24 +87,6 @@ export async function getFamilyById(
       updated_at: data.updated_at,
     },
   };
-}
-
-export async function getActiveFamily(
-  userId: string,
-): Promise<FamilyWithMembership | null> {
-  const families = await getUserFamilies(userId);
-  const activeFamilyId = await getActiveFamilyIdFromCookie();
-
-  if (activeFamilyId) {
-    const activeFamily = families.find(
-      (family) => family.id === activeFamilyId,
-    );
-    if (activeFamily) {
-      return activeFamily;
-    }
-  }
-
-  return families.find((family) => !family.archived_at) ?? families[0] ?? null;
 }
 
 export async function getFamilyMembers(
