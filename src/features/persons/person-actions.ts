@@ -271,3 +271,55 @@ export async function uploadPersonAvatarAction(
 
   return { success: t("person.toast.avatarUploaded") };
 }
+
+export async function removePersonAvatarAction(
+  familyId: string,
+  personId: string,
+): Promise<ActionResult> {
+  const t = await getTranslations();
+  const permission = await requirePersonManagement(familyId);
+
+  if ("error" in permission && permission.error) {
+    return { error: permission.error };
+  }
+
+  const person = await getPersonById(familyId, personId);
+
+  if (!person) {
+    return { error: t("person.errors.notFound") };
+  }
+
+  if (!person.avatar_url) {
+    return { error: t("person.errors.noAvatar") };
+  }
+
+  const storageFolder = `${familyId}/${personId}`;
+  const supabase = await createClient();
+  const { data: files } = await supabase.storage
+    .from(PERSON_AVATARS_BUCKET)
+    .list(storageFolder);
+
+  if (files?.length) {
+    const { error: removeError } = await supabase.storage
+      .from(PERSON_AVATARS_BUCKET)
+      .remove(files.map((file) => `${storageFolder}/${file.name}`));
+
+    if (removeError) {
+      return { error: removeError.message };
+    }
+  }
+
+  const { error: updateError } = await supabase
+    .from("persons")
+    .update({ avatar_url: null })
+    .eq("id", personId)
+    .eq("family_id", familyId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  revalidatePersonPaths(familyId, personId);
+
+  return { success: t("person.toast.avatarRemoved") };
+}

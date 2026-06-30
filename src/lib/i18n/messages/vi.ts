@@ -84,6 +84,8 @@ export const vi: Messages = {
     lightMode: "Sáng",
     darkMode: "Tối",
     systemTheme: "Hệ thống",
+    imageCompressFailed: "Không thể xử lý ảnh này. Vui lòng thử tệp khác.",
+    viewAvatar: "Xem ảnh",
   },
   landing: {
     title: "Lưu giữ câu chuyện gia đình qua nhiều thế hệ",
@@ -171,14 +173,17 @@ export const vi: Messages = {
     avatarDescription: "Tải ảnh cho tài khoản của bạn.",
     uploadAvatar: "Tải ảnh",
     uploadImage: "Tải lên",
+    removeAvatar: "Xóa ảnh",
     toast: {
       updated: "Cập nhật hồ sơ thành công.",
       avatarUploaded: "Tải ảnh đại diện thành công.",
+      avatarRemoved: "Đã xóa ảnh đại diện.",
     },
     errors: {
       notFound: "Không tìm thấy hồ sơ.",
       update: "Không thể cập nhật hồ sơ.",
       selectImage: "Chọn ảnh để tải lên.",
+      noAvatar: "Không có ảnh đại diện để xóa.",
     },
   },
   family: {
@@ -295,8 +300,9 @@ export const vi: Messages = {
     createPerson: "Tạo thành viên",
     archivePerson: "Lưu trữ thành viên",
     restorePerson: "Khôi phục thành viên",
-    uploadAvatar: "Tải ảnh đại diện",
-    uploadImage: "Tải ảnh",
+    uploadAvatar: "Tải ảnh",
+    uploadImage: "Tải lên",
+    removeAvatar: "Xóa ảnh",
     searchByName: "Tìm theo tên",
     birthYear: "Năm sinh",
     deathYear: "Năm mất",
@@ -333,11 +339,13 @@ export const vi: Messages = {
       archived: "Lưu trữ thành viên thành công.",
       restored: "Khôi phục thành viên thành công.",
       avatarUploaded: "Tải ảnh đại diện thành công.",
+      avatarRemoved: "Đã xóa ảnh đại diện.",
     },
     errors: {
       manage: "Bạn không có quyền quản lý thành viên.",
       notFound: "Không tìm thấy thành viên.",
-      selectImage: "Vui lòng chọn tệp ảnh.",
+      selectImage: "Chọn ảnh để tải lên.",
+      noAvatar: "Không có ảnh đại diện để xóa.",
     },
   },
   relationship: {

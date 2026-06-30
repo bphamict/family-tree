@@ -115,3 +115,43 @@ export async function uploadProfileAvatarAction(
 
   return { success: t("profile.toast.avatarUploaded") };
 }
+
+export async function removeProfileAvatarAction(): Promise<ActionResult> {
+  const t = await getTranslations();
+  const user = await requireUser();
+  const profile = await getProfileByUserId(user.id);
+
+  if (!profile) {
+    return { error: t("profile.errors.notFound") };
+  }
+
+  if (!profile.avatar_url) {
+    return { error: t("profile.errors.noAvatar") };
+  }
+
+  const supabase = await createClient();
+  const { data: files } = await supabase.storage
+    .from(PROFILE_AVATARS_BUCKET)
+    .list(user.id);
+
+  if (files?.length) {
+    const { error: removeError } = await supabase.storage
+      .from(PROFILE_AVATARS_BUCKET)
+      .remove(files.map((file) => `${user.id}/${file.name}`));
+
+    if (removeError) {
+      return { error: removeError.message };
+    }
+  }
+
+  try {
+    await updateProfile(user.id, { avatar_url: null });
+  } catch {
+    return { error: t("profile.errors.update") };
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/families");
+
+  return { success: t("profile.toast.avatarRemoved") };
+}
