@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
+  BookUser,
   Calendar,
   FileText,
   Network,
@@ -83,6 +84,13 @@ export default async function FamilyDetailPage({
           href: `/families/${family.id}/tree`,
           label: t("family.viewTree"),
           icon: Network,
+        }
+      : null,
+    canView && personCount > 1
+      ? {
+          href: `/families/${family.id}/kinship`,
+          label: t("family.hub.kinship"),
+          icon: BookUser,
         }
       : null,
     canView

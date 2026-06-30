@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Network, Pencil } from "lucide-react";
+import { ArrowLeft, BookUser, Network, Pencil } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/shared/app-header";
@@ -94,6 +94,14 @@ export default async function PersonDetailPage({
         <PageHeader
           actions={
             <>
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}/kinship?speaker=${personId}`}
+                  aria-label={t("kinship.title")}
+                >
+                  <BookUser className="size-4" />
+                </Link>
+              </Button>
               <Button asChild variant="outline" size="icon">
                 <Link
                   href={`/families/${familyId}/tree?root=${personId}`}

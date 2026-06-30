@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookUser } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { PageContainer } from "@/components/shared/page-container";
@@ -53,14 +53,26 @@ export default async function FamilyTreePage({
         <PageHeader
           className="shrink-0"
           actions={
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}`}
-                aria-label={t("common.backToFamily")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
+            <>
+              {persons.length > 1 && (
+                <Button asChild variant="outline" size="icon">
+                  <Link
+                    href={`/families/${familyId}/kinship${initialRootPersonId ? `?speaker=${initialRootPersonId}` : ""}`}
+                    aria-label={t("kinship.title")}
+                  >
+                    <BookUser className="size-4" />
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}`}
+                  aria-label={t("common.backToFamily")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            </>
           }
         >
           <div className="flex flex-col gap-2">
