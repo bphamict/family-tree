@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CreateFamilyDialog } from "@/features/families/create-family-form";
 import {
   Card,
   CardContent,
@@ -105,14 +105,9 @@ export default async function DashboardPage() {
                   <p className="text-muted-foreground text-sm">
                     {t("family.notJoinedFamily")}
                   </p>
-                  <Button asChild size="icon">
-                    <Link
-                      href="/families/new"
-                      aria-label={t("family.createAFamily")}
-                    >
-                      <Plus className="size-4" />
-                    </Link>
-                  </Button>
+                  <CreateFamilyDialog
+                    triggerAriaLabel={t("family.createAFamily")}
+                  />
                 </div>
               )}
             </CardContent>

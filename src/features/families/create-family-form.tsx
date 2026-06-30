@@ -1,16 +1,57 @@
 "use client";
 
 import { useTransition } from "react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createFamilyAction } from "@/features/families/family-actions";
 import { useTranslations } from "@/lib/i18n/use-translator";
 
-export function CreateFamilyForm() {
+type CreateFamilyDialogProps = {
+  triggerAriaLabel?: string;
+};
+
+export function CreateFamilyDialog({
+  triggerAriaLabel,
+}: CreateFamilyDialogProps) {
+  const t = useTranslations();
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          size="icon"
+          aria-label={triggerAriaLabel ?? t("family.createTitle")}
+        >
+          <Plus className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("family.createFormTitle")}</DialogTitle>
+          <DialogDescription>
+            {t("family.createFormDescription")}
+          </DialogDescription>
+        </DialogHeader>
+        <CreateFamilyForm />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CreateFamilyForm() {
   const t = useTranslations();
   const [isPending, startTransition] = useTransition();
 

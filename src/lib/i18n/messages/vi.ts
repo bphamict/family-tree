@@ -27,6 +27,7 @@ export const vi: Messages = {
     notSet: "Chưa thiết lập",
     noDescription: "Không có mô tả",
     backToFamily: "Về gia đình",
+    backToFamilies: "Về danh sách gia đình",
     backToList: "Về danh sách",
     backToTimeline: "Về dòng thời gian",
     backToSignIn: "Về đăng nhập",

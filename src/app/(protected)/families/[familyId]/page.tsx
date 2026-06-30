@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  ArrowLeft,
   Calendar,
   FileText,
   Network,
@@ -13,6 +14,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FamilySettingsDialog } from "@/features/families/edit-family-form";
 import { getFamilyById } from "@/features/families/family-service";
 import { getDocumentCount } from "@/features/documents/document-service";
@@ -145,13 +147,23 @@ export default async function FamilyDetailPage({
               <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
                 {family.name}
               </h1>
-              {showSettings && (
-                <FamilySettingsDialog
-                  family={family}
-                  canManage={canManage}
-                  canArchive={canArchive}
-                />
-              )}
+              <div className="flex gap-2">
+                {showSettings && (
+                  <FamilySettingsDialog
+                    family={family}
+                    canManage={canManage}
+                    canArchive={canArchive}
+                  />
+                )}
+                <Button asChild variant="outline" size="icon">
+                  <Link
+                    href="/families"
+                    aria-label={t("common.backToFamilies")}
+                  >
+                    <ArrowLeft className="size-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">

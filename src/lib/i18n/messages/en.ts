@@ -25,6 +25,7 @@ export const en = {
     notSet: "Not set",
     noDescription: "No description",
     backToFamily: "Back to family",
+    backToFamilies: "Back to families",
     backToList: "Back to list",
     backToTimeline: "Back to timeline",
     backToSignIn: "Back to sign in",
