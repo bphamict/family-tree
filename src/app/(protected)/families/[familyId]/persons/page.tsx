@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { getFamilyById } from "@/features/families/family-service";
 import { PersonCard } from "@/features/persons/person-card";
@@ -61,11 +64,34 @@ export default async function PersonsPage({
   const canManage = canManagePersons(family.membership.role);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer>
+        <PageHeader
+          actions={
+            <>
+              {canManage && (
+                <Button asChild size="icon">
+                  <Link
+                    href={`/families/${familyId}/persons/new`}
+                    aria-label={t("family.addPerson")}
+                  >
+                    <Plus className="size-4" />
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}`}
+                  aria-label={t("common.backToFamily")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            </>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("person.membersHeading", { familyName: family.name })}
@@ -74,27 +100,7 @@ export default async function PersonsPage({
               {t("common.personCount", { count: persons.length })}
             </p>
           </div>
-          <div className="flex gap-2">
-            {canManage && (
-              <Button asChild size="icon">
-                <Link
-                  href={`/families/${familyId}/persons/new`}
-                  aria-label={t("family.addPerson")}
-                >
-                  <Plus className="size-4" />
-                </Link>
-              </Button>
-            )}
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}`}
-                aria-label={t("common.backToFamily")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        </PageHeader>
 
         <PersonSearchForm filters={filters} />
 
@@ -119,7 +125,7 @@ export default async function PersonsPage({
             ))}
           </section>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

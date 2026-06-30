@@ -39,19 +39,15 @@ export async function LinkedDocumentsSection({
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle>{sectionTitle}</CardTitle>
-            <CardDescription>{sectionDescription}</CardDescription>
-          </div>
-          {canManage && uploadHref && (
-            <Button asChild size="sm" variant="outline">
-              <Link href={uploadHref}>{t("common.upload")}</Link>
-            </Button>
-          )}
-        </div>
+        <CardTitle>{sectionTitle}</CardTitle>
+        <CardDescription>{sectionDescription}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
+        {canManage && uploadHref && (
+          <Button asChild size="sm" variant="outline" className="w-fit">
+            <Link href={uploadHref}>{t("common.upload")}</Link>
+          </Button>
+        )}
         {documents.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             {t("document.emptyLinked")}

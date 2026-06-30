@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -64,11 +67,19 @@ export default async function NewDocumentPage({
       : `/families/${familyId}/documents`;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer size="narrow">
+        <PageHeader
+          actions={
+            <Button asChild variant="outline">
+              <Link href={`/families/${familyId}/documents`}>
+                {t("common.cancel")}
+              </Link>
+            </Button>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("document.uploadHeading")}
@@ -77,12 +88,7 @@ export default async function NewDocumentPage({
               {t("document.uploadDescription", { familyName: family.name })}
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href={`/families/${familyId}/documents`}>
-              {t("common.cancel")}
-            </Link>
-          </Button>
-        </section>
+        </PageHeader>
 
         <Card>
           <CardHeader>
@@ -102,7 +108,7 @@ export default async function NewDocumentPage({
             />
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

@@ -1,31 +1,22 @@
 "use client";
 
-import {
-  Maximize2,
-  Minimize2,
-  Minus,
-  Plus,
-  RotateCcw,
-  Search,
-} from "lucide-react";
+import { Maximize2, Minimize2, Minus, Plus, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PersonSelect } from "@/components/shared/person-select";
 import { useTranslations } from "@/lib/i18n/use-translator";
-import { formatPersonName, type Person } from "@/types/person";
+import type { Person } from "@/types/person";
 import { MAX_TREE_DEPTH } from "@/types/tree";
 
 type FamilyTreeToolbarProps = {
   persons: Person[];
   rootPersonId: string;
-  searchQuery: string;
   ancestorDepth: number;
   descendantDepth: number;
   hasMoreAncestors: boolean;
   hasMoreDescendants: boolean;
   scale: number;
-  onSearchQueryChange: (value: string) => void;
   onRootPersonChange: (personId: string) => void;
   onAncestorDepthChange: (depth: number) => void;
   onDescendantDepthChange: (depth: number) => void;
@@ -39,13 +30,11 @@ type FamilyTreeToolbarProps = {
 export function FamilyTreeToolbar({
   persons,
   rootPersonId,
-  searchQuery,
   ancestorDepth,
   descendantDepth,
   hasMoreAncestors,
   hasMoreDescendants,
   scale,
-  onSearchQueryChange,
   onRootPersonChange,
   onAncestorDepthChange,
   onDescendantDepthChange,
@@ -56,43 +45,19 @@ export function FamilyTreeToolbar({
   onToggleFullscreen,
 }: FamilyTreeToolbarProps) {
   const t = useTranslations();
-  const filteredPersons = persons.filter((person) => {
-    const name = formatPersonName(person).toLowerCase();
-    return name.includes(searchQuery.toLowerCase());
-  });
 
   return (
-    <div className="bg-background/95 flex flex-col gap-4 border-b p-4 backdrop-blur">
+    <div className="bg-background/95 border-b p-4 backdrop-blur">
       <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto_auto]">
-        <div className="grid gap-2">
-          <Label htmlFor="tree-search">{t("tree.searchMembers")}</Label>
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
-            <Input
-              id="tree-search"
-              value={searchQuery}
-              onChange={(event) => onSearchQueryChange(event.target.value)}
-              placeholder={t("tree.searchPlaceholder")}
-              className="pl-9"
-            />
-          </div>
-          {searchQuery && filteredPersons.length > 0 && (
-            <div className="max-h-40 overflow-y-auto rounded-md border">
-              {filteredPersons.slice(0, 8).map((person) => (
-                <button
-                  key={person.id}
-                  type="button"
-                  className="hover:bg-accent block w-full px-3 py-2 text-left text-sm"
-                  onClick={() => {
-                    onRootPersonChange(person.id);
-                    onSearchQueryChange("");
-                  }}
-                >
-                  {formatPersonName(person)}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="focus-person">{t("tree.focusPerson")}</Label>
+          <PersonSelect
+            id="focus-person"
+            persons={persons}
+            value={rootPersonId}
+            onValueChange={onRootPersonChange}
+            className="w-full min-w-0"
+          />
         </div>
 
         <DepthControl
@@ -158,21 +123,6 @@ export function FamilyTreeToolbar({
             </Button>
           </div>
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Label className="sr-only">{t("tree.focusPerson")}</Label>
-        <select
-          value={rootPersonId}
-          onChange={(event) => onRootPersonChange(event.target.value)}
-          className="border-input bg-background h-9 min-w-[220px] rounded-md border px-3 text-sm"
-        >
-          {persons.map((person) => (
-            <option key={person.id} value={person.id}>
-              {formatPersonName(person)}
-            </option>
-          ))}
-        </select>
       </div>
     </div>
   );

@@ -51,7 +51,7 @@ export const DEFAULT_DESCENDANT_DEPTH = 2;
 export const MAX_TREE_DEPTH = 6;
 
 export const TREE_NODE_WIDTH = 120;
-export const TREE_NODE_HEIGHT = 168;
+export const TREE_NODE_HEIGHT = 192;
 export const TREE_HORIZONTAL_GAP = 48;
 export const TREE_GENERATION_GAP = 48;
 export const TREE_VERTICAL_GAP = TREE_NODE_HEIGHT + TREE_GENERATION_GAP;

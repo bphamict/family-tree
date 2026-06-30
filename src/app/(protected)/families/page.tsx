@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { CreateFamilyDialog } from "@/features/families/create-family-form";
 import { FamilyCard } from "@/features/families/family-card";
 import { getUserFamilies } from "@/features/families/family-service";
@@ -18,11 +21,15 @@ export default async function FamiliesPage() {
   const families = await getUserFamilies(user.id);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer>
+        <PageHeader
+          actions={
+            <CreateFamilyDialog triggerAriaLabel={t("family.createTitle")} />
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("family.title")}
@@ -31,8 +38,7 @@ export default async function FamiliesPage() {
               {t("family.manageFamilies")}
             </p>
           </div>
-          <CreateFamilyDialog triggerAriaLabel={t("family.createTitle")} />
-        </section>
+        </PageHeader>
 
         {families.length === 0 ? (
           <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed p-8">
@@ -48,7 +54,7 @@ export default async function FamiliesPage() {
             ))}
           </section>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

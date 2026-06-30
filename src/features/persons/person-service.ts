@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Person, PersonSearchFilters } from "@/types/person";
+import { matchesSearch } from "@/lib/string/normalize-search";
+import {
+  formatPersonName,
+  type Person,
+  type PersonSearchFilters,
+} from "@/types/person";
 
 const PERSON_SELECT =
   "id, family_id, branch_id, first_name, middle_name, last_name, other_name, gender, birth_date, death_date, biography, occupation, avatar_url, archived_at, created_at, updated_at";
@@ -65,20 +70,21 @@ export async function getPersonsByFamily(
       .lte("death_date", `${filters.deathYear}-12-31`);
   }
 
-  if (filters.query) {
-    const search = `%${filters.query}%`;
-    query = query.or(
-      `first_name.ilike.${search},middle_name.ilike.${search},last_name.ilike.${search},other_name.ilike.${search}`,
-    );
-  }
-
   const { data, error } = await query;
 
   if (error) {
     throw error;
   }
 
-  return (data ?? []).map(mapPerson);
+  let persons = (data ?? []).map(mapPerson);
+
+  if (filters.query) {
+    persons = persons.filter((person) =>
+      personMatchesQuery(person, filters.query!),
+    );
+  }
+
+  return persons;
 }
 
 export async function getPersonById(
@@ -115,4 +121,16 @@ export async function getPersonCount(familyId: string): Promise<number> {
   }
 
   return count ?? 0;
+}
+
+function personMatchesQuery(person: Person, query: string): boolean {
+  const searchableFields = [
+    person.first_name,
+    person.middle_name,
+    person.last_name,
+    person.other_name,
+    formatPersonName(person),
+  ].filter((value): value is string => Boolean(value));
+
+  return searchableFields.some((field) => matchesSearch(field, query));
 }

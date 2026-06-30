@@ -4,6 +4,9 @@ import { ArrowLeft, Network, Pencil } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { PersonAvatar } from "@/components/shared/person-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,14 +87,35 @@ export default async function PersonDetailPage({
     ]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer size="narrow">
+        <PageHeader
+          actions={
+            <>
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}/tree?root=${personId}`}
+                  aria-label={t("common.viewInTree")}
+                >
+                  <Network className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}/persons`}
+                  aria-label={t("common.backToList")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            </>
+          }
+        >
           <div className="flex items-center gap-4">
-            <PersonAvatar person={person} size="lg" />
-            <div className="flex flex-col gap-2">
+            <PersonAvatar person={person} size="lg" className="shrink-0" />
+            <div className="flex min-w-0 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-semibold tracking-tight">
                   {formatPersonName(person)}
@@ -112,26 +136,7 @@ export default async function PersonDetailPage({
               )}
             </div>
           </div>
-
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}/tree?root=${personId}`}
-                aria-label={t("common.viewInTree")}
-              >
-                <Network className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}/persons`}
-                aria-label={t("common.backToList")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        </PageHeader>
 
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
@@ -246,8 +251,8 @@ export default async function PersonDetailPage({
             </CardContent>
           </Card>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }
 

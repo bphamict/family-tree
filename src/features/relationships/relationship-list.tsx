@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { PersonAvatar } from "@/components/shared/person-avatar";
+import { GenderIcon } from "@/components/shared/gender-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -184,10 +185,21 @@ function RelationshipRow({
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">
-        <PersonAvatar person={relatedPerson} size="sm" />
-        <div className="flex flex-col gap-1">
+    <div className="flex items-start justify-between gap-3 p-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="relative shrink-0">
+          <PersonAvatar person={relatedPerson} size="sm" />
+          {relatedPerson.gender && (
+            <span className="bg-card absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full border shadow-sm">
+              <GenderIcon
+                gender={relatedPerson.gender}
+                label={t(`person.genderLabels.${relatedPerson.gender}`)}
+                iconClassName="size-3"
+              />
+            </span>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/families/${familyId}/persons/${relatedPerson.id}`}
@@ -212,7 +224,7 @@ function RelationshipRow({
       </div>
 
       {canManage && (
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {canReorder && (
             <>
               <Button

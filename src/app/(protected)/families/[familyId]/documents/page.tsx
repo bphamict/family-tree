@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { DocumentFilterForm } from "@/features/documents/document-filter-form";
 import { DocumentGallery } from "@/features/documents/document-gallery";
@@ -66,11 +69,34 @@ export default async function DocumentsPage({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer size="wide">
+        <PageHeader
+          actions={
+            <>
+              {canManage && (
+                <Button asChild size="icon">
+                  <Link
+                    href={`/families/${familyId}/documents/new`}
+                    aria-label={t("family.uploadDocument")}
+                  >
+                    <Plus className="size-4" />
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}`}
+                  aria-label={t("common.backToFamily")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            </>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("document.archiveHeading", { familyName: family.name })}
@@ -79,27 +105,7 @@ export default async function DocumentsPage({
               {t("common.documentCount", { count: documents.length })}
             </p>
           </div>
-          <div className="flex gap-2">
-            {canManage && (
-              <Button asChild size="icon">
-                <Link
-                  href={`/families/${familyId}/documents/new`}
-                  aria-label={t("family.uploadDocument")}
-                >
-                  <Upload className="size-4" />
-                </Link>
-              </Button>
-            )}
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}`}
-                aria-label={t("common.backToFamily")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        </PageHeader>
 
         <Suspense fallback={<div className="h-24 rounded-lg border" />}>
           <DocumentFilterForm
@@ -114,7 +120,7 @@ export default async function DocumentsPage({
           documents={documents}
           canManage={canManage}
         />
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -53,11 +56,19 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer size="narrow">
+        <PageHeader
+          actions={
+            <Button asChild variant="outline">
+              <Link href={`/families/${familyId}/persons/${personId}`}>
+                {t("common.cancel")}
+              </Link>
+            </Button>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("person.editHeading", { name: formatPersonName(person) })}
@@ -66,12 +77,7 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
               {t("person.editDescription")}
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href={`/families/${familyId}/persons/${personId}`}>
-              {t("common.cancel")}
-            </Link>
-          </Button>
-        </section>
+        </PageHeader>
 
         <Card>
           <CardHeader>
@@ -92,7 +98,7 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
             <PersonForm familyId={familyId} person={person} mode="edit" />
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

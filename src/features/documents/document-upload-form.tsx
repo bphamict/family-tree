@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PersonSelect } from "@/components/shared/person-select";
 import {
   Select,
   SelectContent,
@@ -18,7 +19,7 @@ import { uploadDocumentAction } from "@/features/documents/document-actions";
 import { DOCUMENT_ACCEPT_TYPES } from "@/lib/document/constants";
 import { useTranslations } from "@/lib/i18n/use-translator";
 import type { Event } from "@/types/event";
-import { formatPersonName, type Person } from "@/types/person";
+import type { Person } from "@/types/person";
 
 type DocumentUploadFormProps = {
   familyId: string;
@@ -107,25 +108,16 @@ export function DocumentUploadForm({
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="personId">{t("document.linkPerson")}</Label>
-          <Select
+          <PersonSelect
+            id="personId"
+            persons={persons}
             value={personId || "none"}
-            onValueChange={(value) =>
-              setPersonId(value === "none" ? "" : value)
+            onValueChange={(nextValue) =>
+              setPersonId(nextValue === "none" ? "" : nextValue)
             }
+            emptyOption={{ value: "none", label: t("common.noPerson") }}
             disabled={isPending || Boolean(defaultPersonId)}
-          >
-            <SelectTrigger id="personId">
-              <SelectValue placeholder={t("common.noPerson")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{t("common.noPerson")}</SelectItem>
-              {persons.map((person) => (
-                <SelectItem key={person.id} value={person.id}>
-                  {formatPersonName(person)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </div>
 
         <div className="grid gap-2">

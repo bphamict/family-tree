@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CreateFamilyDialog } from "@/features/families/create-family-form";
@@ -41,10 +43,10 @@ export default async function DashboardPage() {
     ]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
+      <PageContainer>
         <section className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">
             {t("common.dashboard")}
@@ -169,7 +171,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </section>
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

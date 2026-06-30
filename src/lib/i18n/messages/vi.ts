@@ -70,6 +70,7 @@ export const vi: Messages = {
     familyCount: "Tổng cộng {count} gia đình",
     dashboard: "Bảng điều khiển",
     families: "Gia đình",
+    menu: "Menu",
     signIn: "Đăng nhập",
     signOut: "Đăng xuất",
     signingOut: "Đang đăng xuất...",

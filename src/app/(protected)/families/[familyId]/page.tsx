@@ -13,6 +13,9 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FamilySettingsDialog } from "@/features/families/edit-family-form";
@@ -137,17 +140,14 @@ export default async function FamilyDetailPage({
   ].filter((item): item is WidgetItem => item !== null);
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-10">
-        <div className="flex flex-col gap-6">
-          <header className="flex flex-col gap-3">
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                {family.name}
-              </h1>
-              <div className="flex gap-2">
+      <PageContainer>
+        <header className="flex flex-col gap-3">
+          <PageHeader
+            actions={
+              <>
                 {showSettings && (
                   <FamilySettingsDialog
                     family={family}
@@ -163,48 +163,52 @@ export default async function FamilyDetailPage({
                     <ArrowLeft className="size-4" />
                   </Link>
                 </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">
-                {t(`family.roles.${family.membership.role}`)}
-              </Badge>
-              {isArchived && (
-                <Badge variant="secondary">{t("common.archived")}</Badge>
-              )}
-            </div>
-            {family.description && (
-              <p className="text-muted-foreground text-sm">
-                {family.description}
-              </p>
+              </>
+            }
+          >
+            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              {family.name}
+            </h1>
+          </PageHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">
+              {t(`family.roles.${family.membership.role}`)}
+            </Badge>
+            {isArchived && (
+              <Badge variant="secondary">{t("common.archived")}</Badge>
             )}
-          </header>
-
-          {widgets.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {widgets.map((widget) => (
-                <Link
-                  key={widget.href}
-                  href={widget.href}
-                  className="hover:bg-muted/50 focus-visible:ring-ring focus-visible:ring-offset-background flex min-h-20 items-center gap-4 rounded-xl border px-6 py-5 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                >
-                  <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-lg">
-                    <widget.icon className="size-6" aria-hidden />
-                  </div>
-                  <span className="flex-1 text-base font-medium">
-                    {widget.label}
-                  </span>
-                  {widget.count !== undefined && (
-                    <span className="text-2xl font-semibold tabular-nums">
-                      {widget.count}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
+          </div>
+          {family.description && (
+            <p className="text-muted-foreground text-sm">
+              {family.description}
+            </p>
           )}
-        </div>
-      </main>
-    </div>
+        </header>
+
+        {widgets.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {widgets.map((widget) => (
+              <Link
+                key={widget.href}
+                href={widget.href}
+                className="hover:bg-muted/50 focus-visible:ring-ring focus-visible:ring-offset-background flex min-h-20 items-center gap-4 rounded-xl border px-6 py-5 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-lg">
+                  <widget.icon className="size-6" aria-hidden />
+                </div>
+                <span className="flex-1 text-base font-medium">
+                  {widget.label}
+                </span>
+                {widget.count !== undefined && (
+                  <span className="text-2xl font-semibold tabular-nums">
+                    {widget.count}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </PageContainer>
+    </PageShell>
   );
 }

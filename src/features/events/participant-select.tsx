@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { matchesSearch } from "@/lib/string/normalize-search";
 import { useTranslations } from "@/lib/i18n/use-translator";
 import { formatPersonName, type Person } from "@/types/person";
 
@@ -21,14 +22,10 @@ export function ParticipantSelect({
   const t = useTranslations();
   const [query, setQuery] = useState("");
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredPersons = persons.filter((person) => {
-    if (!normalizedQuery) {
-      return true;
-    }
-
-    return formatPersonName(person).toLowerCase().includes(normalizedQuery);
-  });
+  const normalizedQuery = query.trim();
+  const filteredPersons = persons.filter((person) =>
+    matchesSearch(formatPersonName(person), normalizedQuery),
+  );
 
   return (
     <div className="flex flex-col gap-3">

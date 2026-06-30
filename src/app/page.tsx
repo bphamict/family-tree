@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,10 +24,10 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
+      <PageContainer>
         <section className="flex flex-col gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">
             {t("home.title")}
@@ -96,7 +98,7 @@ export default async function Home() {
             </CardContent>
           </Card>
         </section>
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

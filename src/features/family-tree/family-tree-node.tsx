@@ -29,7 +29,7 @@ export function FamilyTreeNodeCard({
 
   return (
     <div
-      className="absolute z-10"
+      className="pointer-events-none absolute z-10"
       style={{
         left: x,
         top: y,
@@ -39,19 +39,12 @@ export function FamilyTreeNodeCard({
     >
       <div
         className={cn(
-          "bg-card hover:border-primary/60 flex h-full flex-col items-center gap-1 overflow-hidden rounded-xl border p-2 shadow-sm transition-colors",
-          isRoot ? "justify-start" : "justify-between",
+          "bg-card hover:border-primary/60 flex h-full flex-col items-center justify-between gap-1 overflow-hidden rounded-xl border p-2 shadow-sm transition-colors",
           isRoot && "ring-primary ring-2",
         )}
       >
         <div className="flex w-full flex-col items-center gap-1">
-          <Link
-            href={`/families/${familyId}/persons/${person.id}`}
-            className="focus-visible:ring-ring focus-visible:ring-offset-background relative shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            data-no-pan
-            onPointerDown={(event) => event.stopPropagation()}
-            aria-label={t("common.viewProfile")}
-          >
+          <div className="relative shrink-0">
             <PersonAvatar person={person} size="sm" />
             {person.gender && (
               <span className="bg-card absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full border shadow-sm">
@@ -62,7 +55,7 @@ export function FamilyTreeNodeCard({
                 />
               </span>
             )}
-          </Link>
+          </div>
 
           <div className="flex w-full min-w-0 flex-col gap-0.5 px-0.5 text-center">
             <p className="w-full text-xs leading-snug font-semibold break-words">
@@ -81,12 +74,22 @@ export function FamilyTreeNodeCard({
           </div>
         </div>
 
-        {!isRoot && (
-          <div
-            className="flex w-full shrink-0 flex-col"
-            data-no-pan
-            onPointerDown={(event) => event.stopPropagation()}
+        <div
+          className="pointer-events-auto flex w-full shrink-0 flex-col"
+          data-no-pan
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-6 w-full px-1 text-[10px]"
           >
+            <Link href={`/families/${familyId}/persons/${person.id}`}>
+              {t("common.viewProfile")}
+            </Link>
+          </Button>
+          {!isRoot && (
             <Button
               type="button"
               variant="ghost"
@@ -96,8 +99,8 @@ export function FamilyTreeNodeCard({
             >
               {t("tree.setRoot")}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

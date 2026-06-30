@@ -68,6 +68,7 @@ export const en = {
     familyCount: "{count} family/families total",
     dashboard: "Dashboard",
     families: "Families",
+    menu: "Menu",
     signIn: "Sign in",
     signOut: "Sign out",
     signingOut: "Signing out...",

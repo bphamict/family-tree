@@ -7,9 +7,18 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/auth-service";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "@/lib/i18n/use-translator";
 
-export function SignOutButton() {
+type SignOutButtonProps = {
+  className?: string;
+  showLabel?: boolean;
+};
+
+export function SignOutButton({
+  className,
+  showLabel = false,
+}: SignOutButtonProps) {
   const t = useTranslations();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -33,12 +42,15 @@ export function SignOutButton() {
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size={showLabel ? "default" : "sm"}
       onClick={handleSignOut}
       disabled={isSigningOut}
       aria-label={isSigningOut ? t("common.signingOut") : t("common.signOut")}
+      className={cn(showLabel && "justify-start", className)}
     >
       <LogOut className="size-4" aria-hidden />
+      {showLabel &&
+        (isSigningOut ? t("common.signingOut") : t("common.signOut"))}
     </Button>
   );
 }

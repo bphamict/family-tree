@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { EventFilterForm } from "@/features/events/event-filter-form";
 import { getEventsByFamily } from "@/features/events/event-service";
@@ -58,11 +61,34 @@ export default async function TimelinePage({
   const canManage = canManageEvents(family.membership.role);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-12">
-        <section className="flex flex-wrap items-center justify-between gap-4">
+      <PageContainer>
+        <PageHeader
+          actions={
+            <>
+              {canManage && (
+                <Button asChild size="icon">
+                  <Link
+                    href={`/families/${familyId}/events/new`}
+                    aria-label={t("family.addEvent")}
+                  >
+                    <Plus className="size-4" />
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}`}
+                  aria-label={t("common.backToFamily")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            </>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("event.timelineHeading", { familyName: family.name })}
@@ -71,27 +97,7 @@ export default async function TimelinePage({
               {t("event.timelineDescription", { count: events.length })}
             </p>
           </div>
-          <div className="flex gap-2">
-            {canManage && (
-              <Button asChild size="icon">
-                <Link
-                  href={`/families/${familyId}/events/new`}
-                  aria-label={t("family.addEvent")}
-                >
-                  <Plus className="size-4" />
-                </Link>
-              </Button>
-            )}
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}`}
-                aria-label={t("common.backToFamily")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        </PageHeader>
 
         <Suspense fallback={<div className="h-24 rounded-lg border" />}>
           <EventFilterForm filters={filters} />
@@ -102,7 +108,7 @@ export default async function TimelinePage({
           events={events}
           canManage={canManage}
         />
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

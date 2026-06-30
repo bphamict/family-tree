@@ -49,7 +49,6 @@ export function FamilyTreeView({
   const [descendantDepth, setDescendantDepth] = useState(
     DEFAULT_DESCENDANT_DEPTH,
   );
-  const [searchQuery, setSearchQuery] = useState("");
   const [viewport, setViewport] = useState<TreeViewport>({
     x: 0,
     y: 0,
@@ -125,7 +124,7 @@ export function FamilyTreeView({
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (event.button !== 0) {
+      if (event.pointerType === "mouse" && event.button !== 0) {
         return;
       }
 
@@ -154,7 +153,9 @@ export function FamilyTreeView({
       const deltaY = event.clientY - panOrigin.current.y;
 
       if (!isPanning && isPendingPan) {
-        if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) {
+        const threshold = event.pointerType === "touch" ? 2 : 5;
+
+        if (Math.abs(deltaX) < threshold && Math.abs(deltaY) < threshold) {
           return;
         }
 
@@ -171,7 +172,7 @@ export function FamilyTreeView({
     [isPanning],
   );
 
-  const handlePointerUp = useCallback(
+  const endPan = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (isPanning) {
         event.currentTarget.releasePointerCapture(event.pointerId);
@@ -292,7 +293,6 @@ export function FamilyTreeView({
       <FamilyTreeToolbar
         persons={persons}
         rootPersonId={rootPersonId}
-        searchQuery={searchQuery}
         ancestorDepth={ancestorDepth}
         descendantDepth={descendantDepth}
         hasMoreAncestors={data?.hasMoreAncestors ?? false}
@@ -302,7 +302,6 @@ export function FamilyTreeView({
         onToggleFullscreen={() => {
           void toggleFullscreen();
         }}
-        onSearchQueryChange={setSearchQuery}
         onRootPersonChange={handleRootChange}
         onAncestorDepthChange={setAncestorDepth}
         onDescendantDepthChange={setDescendantDepth}
@@ -332,15 +331,16 @@ export function FamilyTreeView({
       <div
         ref={canvasRef}
         className={cn(
-          "bg-muted/40 relative flex-1 overflow-hidden",
+          "bg-muted/40 relative flex-1 touch-none overflow-hidden select-none",
           "bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:24px_24px]",
           isPanning ? "cursor-grabbing" : "cursor-grab",
         )}
         onWheel={handleWheel}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        onPointerUp={endPan}
+        onPointerCancel={endPan}
+        onPointerLeave={endPan}
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">

@@ -1,11 +1,20 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PERSON_GENDERS } from "@/lib/person/constants";
 import { useTranslations } from "@/lib/i18n/use-translator";
-import type { PersonSearchFilters } from "@/types/person";
+import type { PersonGender, PersonSearchFilters } from "@/types/person";
 
 type PersonSearchFormProps = {
   filters: PersonSearchFilters;
@@ -14,6 +23,7 @@ type PersonSearchFormProps = {
 export function PersonSearchForm({ filters }: PersonSearchFormProps) {
   const t = useTranslations();
   const currentYear = new Date().getFullYear();
+  const [gender, setGender] = useState(filters.gender ?? "all");
 
   return (
     <form
@@ -32,19 +42,22 @@ export function PersonSearchForm({ filters }: PersonSearchFormProps) {
 
       <div className="grid gap-2">
         <Label htmlFor="gender">{t("person.gender")}</Label>
-        <select
-          id="gender"
-          name="gender"
-          defaultValue={filters.gender ?? ""}
-          className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs"
-        >
-          <option value="">{t("common.allGenders")}</option>
-          {PERSON_GENDERS.map((gender) => (
-            <option key={gender} value={gender}>
-              {t(`person.genderLabels.${gender}`)}
-            </option>
-          ))}
-        </select>
+        <Select value={gender} onValueChange={setGender}>
+          <SelectTrigger id="gender">
+            <SelectValue placeholder={t("common.allGenders")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.allGenders")}</SelectItem>
+            {PERSON_GENDERS.map((option) => (
+              <SelectItem key={option} value={option}>
+                {t(`person.genderLabels.${option}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {gender !== "all" && (
+          <input type="hidden" name="gender" value={gender as PersonGender} />
+        )}
       </div>
 
       <div className="grid gap-2">

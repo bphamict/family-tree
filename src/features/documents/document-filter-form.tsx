@@ -5,6 +5,7 @@ import { useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { PersonSelect } from "@/components/shared/person-select";
 import {
   Select,
   SelectContent,
@@ -15,7 +16,7 @@ import {
 import { DOCUMENT_TYPES } from "@/lib/document/constants";
 import { useTranslations } from "@/lib/i18n/use-translator";
 import type { DocumentSearchFilters, DocumentType } from "@/types/document";
-import { formatPersonName, type Person } from "@/types/person";
+import type { Person } from "@/types/person";
 import type { Event } from "@/types/event";
 
 type DocumentFilterFormProps = {
@@ -85,27 +86,18 @@ export function DocumentFilterForm({
 
       <div className="grid gap-2">
         <Label htmlFor="personId">{t("common.person")}</Label>
-        <Select
+        <PersonSelect
+          id="personId"
+          persons={persons}
           value={filters.personId ?? "all"}
           onValueChange={(value) =>
             updateFilters({
               personId: value === "all" ? undefined : value,
             })
           }
+          emptyOption={{ value: "all", label: t("common.allPersons") }}
           disabled={isPending}
-        >
-          <SelectTrigger id="personId">
-            <SelectValue placeholder={t("common.allPersons")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("common.allPersons")}</SelectItem>
-            {persons.map((person) => (
-              <SelectItem key={person.id} value={person.id}>
-                {formatPersonName(person)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       </div>
 
       <div className="grid gap-2">

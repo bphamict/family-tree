@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Network } from "lucide-react";
 
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
+import { AppDesktopNav, AppMobileNav } from "@/components/shared/app-nav";
 import { ThemeSwitcher } from "@/components/shared/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/sign-out-button";
@@ -23,15 +24,11 @@ export async function AppHeader() {
         <nav className="flex items-center gap-2">
           {user ? (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard">{t("common.dashboard")}</Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/families">{t("common.families")}</Link>
-              </Button>
+              <AppDesktopNav />
               <LocaleSwitcher />
               <ThemeSwitcher />
-              <SignOutButton />
+              <SignOutButton className="hidden md:inline-flex" />
+              <AppMobileNav />
             </>
           ) : (
             <>

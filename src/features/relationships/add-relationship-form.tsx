@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PersonSelect } from "@/components/shared/person-select";
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ import {
   type CreateRelationshipType,
 } from "@/lib/relationship/constants";
 import { useTranslations } from "@/lib/i18n/use-translator";
-import { formatPersonName, type Person } from "@/types/person";
+import type { Person } from "@/types/person";
 
 type AddRelationshipFormProps = {
   familyId: string;
@@ -96,22 +97,14 @@ export function AddRelationshipForm({
           <Label htmlFor="relatedPersonId">
             {t("relationship.relatedPerson")}
           </Label>
-          <Select
+          <PersonSelect
+            id="relatedPersonId"
+            persons={personOptions}
             value={relatedPersonId}
             onValueChange={setRelatedPersonId}
+            placeholder={t("relationship.selectPerson")}
             disabled={isPending}
-          >
-            <SelectTrigger id="relatedPersonId">
-              <SelectValue placeholder={t("relationship.selectPerson")} />
-            </SelectTrigger>
-            <SelectContent>
-              {personOptions.map((person) => (
-                <SelectItem key={person.id} value={person.id}>
-                  {formatPersonName(person)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </div>
       </div>
 

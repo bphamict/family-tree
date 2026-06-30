@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { FamilyTreeView } from "@/features/family-tree/family-tree-view";
 import { getPersonsForTree } from "@/features/family-tree/tree-service";
@@ -43,33 +46,37 @@ export default async function FamilyTreePage({
     "";
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 flex-col gap-4 px-4 py-6">
-        <section className="flex shrink-0 flex-wrap items-center justify-between gap-4">
+      <PageContainer size="tree">
+        <PageHeader
+          className="shrink-0"
+          actions={
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/families/${familyId}`}
+                aria-label={t("common.backToFamily")}
+              >
+                <ArrowLeft className="size-4" />
+              </Link>
+            </Button>
+          }
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("tree.heading", { familyName: family.name })}
             </h1>
             <p className="text-muted-foreground">{t("tree.description")}</p>
           </div>
-          <Button asChild variant="outline" size="icon">
-            <Link
-              href={`/families/${familyId}`}
-              aria-label={t("common.backToFamily")}
-            >
-              <ArrowLeft className="size-4" />
-            </Link>
-          </Button>
-        </section>
+        </PageHeader>
 
         <FamilyTreeView
           familyId={familyId}
           persons={persons}
           initialRootPersonId={initialRootPersonId}
         />
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }

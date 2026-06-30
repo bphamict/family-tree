@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AppHeader } from "@/components/shared/app-header";
+import { PageContainer } from "@/components/shared/page-container";
+import { PageShell } from "@/components/shared/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,12 +51,23 @@ export default async function FamilyMembersPage({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PageShell>
       <AppHeader />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-12">
+      <PageContainer>
         <section className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <PageHeader
+            actions={
+              <Button asChild variant="outline" size="icon">
+                <Link
+                  href={`/families/${familyId}`}
+                  aria-label={t("common.backToFamily")}
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Button>
+            }
+          >
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-semibold tracking-tight">
                 {t("person.membersHeading", { familyName: family.name })}
@@ -62,15 +76,7 @@ export default async function FamilyMembersPage({
                 {t("family.membersDescription")}
               </p>
             </div>
-            <Button asChild variant="outline" size="icon">
-              <Link
-                href={`/families/${familyId}`}
-                aria-label={t("common.backToFamily")}
-              >
-                <ArrowLeft className="size-4" />
-              </Link>
-            </Button>
-          </div>
+          </PageHeader>
         </section>
 
         <Card>
@@ -114,7 +120,7 @@ export default async function FamilyMembersPage({
             </Card>
           </>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   );
 }
