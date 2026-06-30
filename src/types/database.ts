@@ -433,6 +433,13 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_family_member_by_email: {
+        Args: {
+          p_email: string;
+          p_family_id: string;
+        };
+        Returns: boolean;
+      };
       has_family_role: {
         Args: {
           p_family_id: string;

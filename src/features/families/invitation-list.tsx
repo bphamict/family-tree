@@ -1,10 +1,12 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { formatDisplayDate } from "@/lib/date/format";
 import { cancelInvitationAction } from "@/features/families/family-actions";
 import { useTranslations } from "@/lib/i18n/use-translator";
@@ -52,13 +54,20 @@ export function InvitationList({
           key={invitation.id}
           className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">{invitation.email}</p>
-            <p className="text-muted-foreground text-sm">
-              {t("common.expires", {
-                date: formatDisplayDate(invitation.expires_at) ?? "",
-              })}
-            </p>
+          <div className="flex min-w-0 items-center gap-3">
+            <UserAvatar
+              fullName={invitation.email}
+              avatarUrl={null}
+              size="sm"
+            />
+            <div className="flex min-w-0 flex-col gap-1">
+              <p className="truncate font-medium">{invitation.email}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("common.expires", {
+                  date: formatDisplayDate(invitation.expires_at) ?? "",
+                })}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -69,11 +78,12 @@ export function InvitationList({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="icon"
                 onClick={() => handleCancel(invitation.id)}
                 disabled={isPending}
+                aria-label={t("common.cancel")}
               >
-                {t("common.cancel")}
+                <Trash2 className="size-4" aria-hidden />
               </Button>
             )}
           </div>

@@ -26,6 +26,7 @@ import { createClient } from "@/lib/supabase/server";
 type ActionResult = {
   error?: string;
   success?: string;
+  familyId?: string;
 };
 
 export async function createFamilyAction(
@@ -196,9 +197,55 @@ export async function inviteMemberAction(
     return { error: t("errors.notAuthenticated") };
   }
 
+  const email = parsed.data.email.toLowerCase();
+
+  const { data: isExistingMember, error: memberCheckError } =
+    await supabase.rpc("is_family_member_by_email", {
+      p_family_id: familyId,
+      p_email: email,
+    });
+
+  if (memberCheckError) {
+    return { error: memberCheckError.message };
+  }
+
+  if (isExistingMember) {
+    return { error: t("family.errors.memberAlreadyExists") };
+  }
+
+  const { data: existingInvitation, error: lookupError } = await supabase
+    .from("family_invitations")
+    .select("id, accepted_at, expires_at")
+    .eq("family_id", familyId)
+    .eq("email", email)
+    .maybeSingle();
+
+  if (lookupError) {
+    return { error: lookupError.message };
+  }
+
+  if (existingInvitation) {
+    const isPending =
+      !existingInvitation.accepted_at &&
+      new Date(existingInvitation.expires_at) > new Date();
+
+    if (isPending) {
+      return { error: t("family.errors.invitationAlreadyPending") };
+    }
+
+    const { error: deleteError } = await supabase
+      .from("family_invitations")
+      .delete()
+      .eq("id", existingInvitation.id);
+
+    if (deleteError) {
+      return { error: deleteError.message };
+    }
+  }
+
   const { error } = await supabase.from("family_invitations").insert({
     family_id: familyId,
-    email: parsed.data.email.toLowerCase(),
+    email,
     role: parsed.data.role,
     invited_by: user.id,
   });
@@ -311,6 +358,7 @@ export async function cancelInvitationAction(
 export async function acceptInvitationAction(
   token: string,
 ): Promise<ActionResult> {
+  const t = await getTranslations();
   await requireUser();
 
   const supabase = await createClient();
@@ -323,6 +371,10 @@ export async function acceptInvitationAction(
     return { error: error.message };
   }
 
+  if (!familyId) {
+    return { error: t("family.errors.acceptInvitation") };
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(ACTIVE_FAMILY_COOKIE, familyId, {
     httpOnly: true,
@@ -331,7 +383,12 @@ export async function acceptInvitationAction(
   });
 
   revalidatePath("/families");
-  redirect(`/families/${familyId}`);
+  revalidatePath(`/families/${familyId}`);
+
+  return {
+    success: t("family.toast.invitationAccepted"),
+    familyId,
+  };
 }
 
 export async function declineInvitationAction(

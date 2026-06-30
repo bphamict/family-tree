@@ -1,10 +1,12 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Select,
   SelectContent,
@@ -86,16 +88,25 @@ export function MembershipList({
             key={member.id}
             className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
           >
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{displayName}</p>
-                {isSelf && <Badge variant="secondary">{t("common.you")}</Badge>}
+            <div className="flex min-w-0 items-center gap-3">
+              <UserAvatar
+                fullName={member.profile?.full_name ?? null}
+                avatarUrl={member.profile?.avatar_url ?? null}
+                size="sm"
+              />
+              <div className="flex min-w-0 flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <p className="truncate font-medium">{displayName}</p>
+                  {isSelf && (
+                    <Badge variant="secondary">{t("common.you")}</Badge>
+                  )}
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  {t("common.joined", {
+                    date: formatDisplayDate(member.created_at) ?? "",
+                  })}
+                </p>
               </div>
-              <p className="text-muted-foreground text-sm">
-                {t("common.joined", {
-                  date: formatDisplayDate(member.created_at) ?? "",
-                })}
-              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -128,11 +139,12 @@ export function MembershipList({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleRemove(member.id)}
                   disabled={isPending}
+                  aria-label={t("common.remove")}
                 >
-                  {t("common.remove")}
+                  <Trash2 className="size-4" aria-hidden />
                 </Button>
               )}
             </div>

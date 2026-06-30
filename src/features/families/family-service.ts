@@ -7,6 +7,7 @@ import type {
   InvitableRole,
   Membership,
   MembershipWithProfile,
+  PendingInvitation,
 } from "@/types/family";
 
 export async function getUserFamilies(
@@ -158,13 +159,13 @@ export async function getFamilyInvitations(
 
 export async function getPendingInvitationsForEmail(
   email: string,
-): Promise<Array<FamilyInvitation & { family: Family }>> {
+): Promise<PendingInvitation[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("family_invitations")
     .select(
-      "id, family_id, email, role, invited_by, token, expires_at, accepted_at, created_at, family:families(id, name, description, archived_at, created_at, updated_at)",
+      "id, family_id, email, role, invited_by, token, expires_at, accepted_at, created_at, family:families(id, name, description, archived_at, created_at, updated_at), inviter:profiles!family_invitations_invited_by_fkey(full_name, avatar_url)",
     )
     .ilike("email", email)
     .is("accepted_at", null)
@@ -188,6 +189,7 @@ export async function getPendingInvitationsForEmail(
       accepted_at: row.accepted_at,
       created_at: row.created_at,
       family: row.family as Family,
+      inviter: row.inviter as PendingInvitation["inviter"],
     }));
 }
 

@@ -73,6 +73,7 @@ export const en = {
     signOut: "Sign out",
     signingOut: "Signing out...",
     createAccount: "Create account",
+    familyMember: "Family member",
     participants: "Participants",
     noPerson: "No person",
     noEvent: "No event",
@@ -226,6 +227,7 @@ export const en = {
     noInvitations: "No pending invitations.",
     accept: "Accept",
     decline: "Decline",
+    invitedBy: "Invited by {name}",
     pendingInvitations: "Pending invitations",
     pendingInvitationsDescription:
       "You have been invited to join the following families.",
@@ -259,6 +261,7 @@ export const en = {
       invitationSent: "Invitation sent successfully.",
       invitationCancelled: "Invitation cancelled.",
       invitationDeclined: "Invitation declined.",
+      invitationAccepted: "Invitation accepted. Welcome to the family!",
       memberRemoved: "Member removed successfully.",
       roleUpdated: "Member role updated successfully.",
     },
@@ -270,6 +273,11 @@ export const en = {
       removeMember: "You do not have permission to remove members.",
       updateRole: "You do not have permission to update member roles.",
       cancelInvitation: "You do not have permission to cancel invitations.",
+      acceptInvitation: "Could not accept this invitation. Try again.",
+      invitationAlreadyPending:
+        "This email already has a pending invitation to this family.",
+      memberAlreadyExists:
+        "This email already belongs to a member of this family.",
     },
   },
   person: {

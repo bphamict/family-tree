@@ -32,6 +32,16 @@ export type FamilyInvitation = {
   created_at: string;
 };
 
+export type InvitationProfile = {
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
+export type PendingInvitation = FamilyInvitation & {
+  family: Family;
+  inviter: InvitationProfile | null;
+};
+
 export type FamilyWithMembership = Family & {
   membership: Membership;
 };

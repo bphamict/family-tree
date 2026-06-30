@@ -75,6 +75,7 @@ export const vi: Messages = {
     signOut: "Đăng xuất",
     signingOut: "Đang đăng xuất...",
     createAccount: "Tạo tài khoản",
+    familyMember: "Thành viên",
     participants: "Người tham gia",
     noPerson: "Không có thành viên",
     noEvent: "Không có sự kiện",
@@ -226,6 +227,7 @@ export const vi: Messages = {
     noInvitations: "Không có lời mời đang chờ.",
     accept: "Chấp nhận",
     decline: "Từ chối",
+    invitedBy: "Được mời bởi {name}",
     pendingInvitations: "Lời mời đang chờ",
     pendingInvitationsDescription: "Bạn được mời tham gia các gia đình sau.",
     activeFamily: "Gia đình đang làm việc",
@@ -257,6 +259,8 @@ export const vi: Messages = {
       invitationSent: "Gửi lời mời thành công.",
       invitationCancelled: "Đã hủy lời mời.",
       invitationDeclined: "Đã từ chối lời mời.",
+      invitationAccepted:
+        "Đã chấp nhận lời mời. Chào mừng bạn đến với gia đình!",
       memberRemoved: "Gỡ thành viên thành công.",
       roleUpdated: "Cập nhật vai trò thành công.",
     },
@@ -268,6 +272,11 @@ export const vi: Messages = {
       removeMember: "Bạn không có quyền gỡ thành viên.",
       updateRole: "Bạn không có quyền cập nhật vai trò thành viên.",
       cancelInvitation: "Bạn không có quyền hủy lời mời.",
+      acceptInvitation: "Không thể chấp nhận lời mời này. Vui lòng thử lại.",
+      invitationAlreadyPending:
+        "Email này đã có lời mời đang chờ cho gia đình này.",
+      memberAlreadyExists:
+        "Email này đã thuộc về một thành viên của gia đình này.",
     },
   },
   person: {
