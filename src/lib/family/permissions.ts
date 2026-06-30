@@ -36,6 +36,10 @@ export function canViewDocuments(): boolean {
   return true;
 }
 
+export function canExportData(): boolean {
+  return true;
+}
+
 export function canManageDocuments(role: FamilyRole): boolean {
   return role === "owner" || role === "admin" || role === "editor";
 }

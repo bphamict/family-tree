@@ -216,6 +216,7 @@ export const en = {
       events: "Events",
       documents: "Documents",
       kinship: "Kinship lookup",
+      data: "Import / export",
       quickActions: "Quick actions",
     },
     membersTitle: "Manage access",
@@ -600,6 +601,40 @@ export const en = {
       younger_relative: "Younger relative",
       unrelated: "No relationship found",
       unknown: "Unable to determine",
+    },
+  },
+  data: {
+    pageTitle: "Import / export",
+    pageHeading: "{familyName} data",
+    pageDescription:
+      "Download a backup of members, relationships, and events, or import data from JSON or CSV.",
+    exportTitle: "Export data",
+    exportDescription:
+      "JSON includes members, relationships, and events. CSV is a spreadsheet-friendly member list with parent and spouse references.",
+    exportJson: "Download JSON backup",
+    exportCsv: "Download CSV (members)",
+    downloadTemplate: "Download CSV template",
+    importTitle: "Import data",
+    importDescription:
+      "Upload a JSON backup or CSV file. New records are added to this family; existing data is not replaced.",
+    importFormat: "File format",
+    importFile: "Data file",
+    formatJson: "JSON backup",
+    formatCsv: "CSV spreadsheet",
+    importAction: "Import data",
+    importing: "Importing...",
+    importViewOnly: "Only editors and above can import data into this family.",
+    importWarnings: "Import completed with warnings",
+    toast: {
+      imported:
+        "Imported {persons} member(s), {relationships} relationship(s), and {events} event(s).",
+    },
+    errors: {
+      selectFile: "Select a file to import.",
+      importPermission: "You do not have permission to import data.",
+      nothingImported:
+        "No records were imported. Check the file format and try again.",
+      importFailed: "Import failed. Check the file and try again.",
     },
   },
   errors: {

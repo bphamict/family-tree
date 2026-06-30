@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   BookUser,
   Calendar,
+  Database,
   FileText,
   Network,
   Plus,
@@ -26,6 +27,7 @@ import { getEventCount } from "@/features/events/event-service";
 import { getPersonCount } from "@/features/persons/person-service";
 import {
   canArchiveFamily,
+  canExportData,
   canInviteMembers,
   canManageDocuments,
   canManageEvents,
@@ -143,6 +145,13 @@ export default async function FamilyDetailPage({
           href: `/families/${family.id}/members`,
           label: t("family.manageAccess"),
           icon: UsersRound,
+        }
+      : null,
+    canExportData()
+      ? {
+          href: `/families/${family.id}/data`,
+          label: t("family.hub.data"),
+          icon: Database,
         }
       : null,
   ].filter((item): item is WidgetItem => item !== null);

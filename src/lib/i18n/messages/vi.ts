@@ -216,6 +216,7 @@ export const vi: Messages = {
       events: "Sự kiện",
       documents: "Tài liệu",
       kinship: "Tra cứu danh xưng",
+      data: "Nhập / xuất dữ liệu",
       quickActions: "Thao tác nhanh",
     },
     membersTitle: "Quản lý quyền truy cập",
@@ -593,6 +594,41 @@ export const vi: Messages = {
       younger_relative: "Người cháu hơn",
       unrelated: "Không có quan hệ",
       unknown: "Chưa xác định được",
+    },
+  },
+  data: {
+    pageTitle: "Nhập / xuất dữ liệu",
+    pageHeading: "Dữ liệu {familyName}",
+    pageDescription:
+      "Tải bản sao lưu thành viên, quan hệ và sự kiện, hoặc nhập dữ liệu từ JSON hoặc CSV.",
+    exportTitle: "Xuất dữ liệu",
+    exportDescription:
+      "JSON gồm thành viên, quan hệ và sự kiện. CSV là danh sách thành viên dạng bảng tính kèm tham chiếu cha/mẹ và vợ/chồng.",
+    exportJson: "Tải bản sao lưu JSON",
+    exportCsv: "Tải CSV (thành viên)",
+    downloadTemplate: "Tải mẫu CSV",
+    importTitle: "Nhập dữ liệu",
+    importDescription:
+      "Tải lên tệp JSON hoặc CSV. Bản ghi mới sẽ được thêm vào gia đình này; dữ liệu hiện có không bị thay thế.",
+    importFormat: "Định dạng tệp",
+    importFile: "Tệp dữ liệu",
+    formatJson: "Sao lưu JSON",
+    formatCsv: "Bảng tính CSV",
+    importAction: "Nhập dữ liệu",
+    importing: "Đang nhập...",
+    importViewOnly:
+      "Chỉ biên tập viên trở lên mới có thể nhập dữ liệu vào gia đình này.",
+    importWarnings: "Nhập xong nhưng có cảnh báo",
+    toast: {
+      imported:
+        "Đã nhập {persons} thành viên, {relationships} quan hệ và {events} sự kiện.",
+    },
+    errors: {
+      selectFile: "Chọn tệp để nhập.",
+      importPermission: "Bạn không có quyền nhập dữ liệu.",
+      nothingImported:
+        "Không có bản ghi nào được nhập. Kiểm tra định dạng tệp và thử lại.",
+      importFailed: "Nhập thất bại. Kiểm tra tệp và thử lại.",
     },
   },
   errors: {
