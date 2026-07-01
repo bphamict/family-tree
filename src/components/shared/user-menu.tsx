@@ -66,9 +66,8 @@ export function UserMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="sm"
           className={cn(
-            "shrink-0 gap-2 px-2 hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 data-[state=open]:border-transparent data-[state=open]:ring-0 md:max-w-[200px] dark:hover:bg-transparent",
+            "h-9 shrink-0 gap-2 px-2 hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 data-[state=open]:border-transparent data-[state=open]:ring-0 md:max-w-[200px] dark:hover:bg-transparent",
             className,
           )}
           aria-label={t("common.accountMenu")}
@@ -77,7 +76,7 @@ export function UserMenu({
             fullName={fullName}
             avatarUrl={avatarUrl}
             size="sm"
-            className="size-8 text-xs"
+            className="size-7 text-xs"
           />
           <span className="hidden truncate md:inline">{displayName}</span>
           <ChevronDown

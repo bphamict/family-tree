@@ -38,7 +38,7 @@ export async function AppHeader() {
               <ThemeSwitcher />
               <AppMobileNav />
               {userMenuProps ? (
-                <div className="hidden md:block">
+                <div className="hidden md:flex md:items-center">
                   <UserMenu {...userMenuProps} />
                 </div>
               ) : null}

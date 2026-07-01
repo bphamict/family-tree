@@ -51,7 +51,7 @@ export function UserAvatar({
         width={imageSizes[size]}
         height={imageSizes[size]}
         className={cn(
-          "rounded-full object-cover",
+          "block rounded-full object-cover",
           sizeClasses[size],
           className,
         )}

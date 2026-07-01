@@ -37,7 +37,7 @@ export function ThemeSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           className="relative"
           aria-label={t("common.theme")}
         >
